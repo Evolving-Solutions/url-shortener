@@ -8,6 +8,8 @@ use routes::echo::echo;
 use routes::hello::hello;
 use routes::url;
 
+use db::connectdb::ConnectDB;
+
 /// # Main web server
 /// Serves as the main entry point to the application.
 /// Publicly accessible.
