@@ -23,6 +23,5 @@ pub async fn get_url() -> impl Responder {
 #[post("/url")]
 pub async fn create_url(req_body: String) -> impl Responder {
     HttpResponse::Ok()
-        .content_type(ContentType::json(kki))
         .body(req_body)
 }

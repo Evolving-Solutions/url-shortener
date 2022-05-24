@@ -4,7 +4,7 @@ pub struct ConnectDB {
     client: Client,
 }
 
-pub impl ConnectDB {
+impl ConnectDB {
     // Parse the connection string into and options struct
     async fn connectdb() {
         let uri =
