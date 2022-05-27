@@ -7,6 +7,15 @@ use mongodb::{bson::doc, Client, Collection, IndexModel};
 pub async fn get_url() -> impl Responder {
     HttpResponse::Ok().body("URL's go here")
 }
+
+/// Type Enum
+// enum Create_URL_Req_Body<T> {
+//     longUrl(String)
+// }
+
+
+
+
 /// # Path /url
 ///
 /// Request Type: POST
@@ -22,6 +31,7 @@ pub async fn get_url() -> impl Responder {
 /// Type: Client
 #[post("/url")]
 pub async fn create_url(req_body: String) -> impl Responder {
-    HttpResponse::Ok()
-        .body(req_body)
+    println!("{}", req_body);
+    // PARSE THE BODY 
+    HttpResponse::Ok().body("Printed response to the server console");
 }
