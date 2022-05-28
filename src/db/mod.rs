@@ -1,2 +1,2 @@
 pub mod connectdb;
-pub struct Url;
+pub mod models;

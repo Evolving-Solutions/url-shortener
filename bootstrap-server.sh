@@ -1,4 +1,4 @@
 #!/bin/sh
 cd server
 cargo install cargo-watch
-cargo watch -x 'run --bin server'
+RUST_BACKTRACE=1 RUST_LOG=actix_web=debug cargo watch -x 'run --bin server'

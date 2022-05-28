@@ -1,0 +1,11 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\src",
+    "\\src\\db",
+    "\\src\\db\\models",
+    "\\src\\routes"
+  ],
+  "SelectedNode": "\\src\\main.rs",
+  "PreviewInSolutionExplorer": false
+}

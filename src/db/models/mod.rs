@@ -1,1 +1,1 @@
-pub struct Url;
+pub mod Url;

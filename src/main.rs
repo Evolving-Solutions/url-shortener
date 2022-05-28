@@ -8,23 +8,17 @@ use routes::echo::echo;
 use routes::hello::hello;
 use routes::url;
 
-use db::connectdb::ConnectDB;
-
 /// # Main web server
 /// Serves as the main entry point to the application.
 /// Publicly accessible.
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    // Parse the connection string into and options struct
-    let uri = std::env::var("MONGODB_URI").unwrap_or_else(|_| "mongodb://localhost:27017".into());
 
-    // Specify the database name
-    let client = Client::with_uri_str(uri).await.expect("failed to connect");
 
-    // List the names of the database in that deployment
-    for db_name in client.list_database_names(None, None).await {
-        println!("{:#?}", db_name);
-    }
+    // // List the names of the database in that deployment
+    // for db_name in client.list_database_names(None, None).await {
+    //     println!("{:#?}", db_name);
+    // }
     HttpServer::new(|| {
         App::new()
             .service(hello)
