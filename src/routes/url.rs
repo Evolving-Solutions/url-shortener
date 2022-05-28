@@ -1,5 +1,6 @@
-use actix_web::{get, post, HttpResponse, Responder};
+use actix_web::{get, post, HttpResponse, Responder, web, Result};
 use mongodb::{bson::doc, Client, Collection, IndexModel};
+use serde::Deserialize;
 
 /// # Name: URL Getter
 /// Description: Get urls
@@ -8,12 +9,11 @@ pub async fn get_url() -> impl Responder {
     HttpResponse::Ok().body("URL's go here")
 }
 
-/// Type Enum
-// enum Create_URL_Req_Body<T> {
-//     longUrl(String)
-// }
-
-
+/// URL Struct
+#[derive(Deserialize)]
+struct FormData {
+    longUrl: String,
+}
 
 
 /// # Path /url
@@ -30,8 +30,8 @@ pub async fn get_url() -> impl Responder {
 /// Name: client
 /// Type: Client
 #[post("/url")]
-pub async fn create_url(req_body: String) -> impl Responder {
+pub async fn create_url(path: web::Path<(u32, String)>) -> Result<String> {
     println!("{}", req_body);
-    // PARSE THE BODY 
+    // PARSE THE BODY
     HttpResponse::Ok().body("Printed response to the server console");
 }
