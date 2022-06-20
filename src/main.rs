@@ -7,7 +7,6 @@ use mongodb::{bson::doc, options::IndexOptions, Client, Collection, IndexModel};
 use routes::echo::echo;
 use routes::hello::hello;
 use routes::url;
-
 /// # Main web server
 /// Serves as the main entry point to the application.
 /// Publicly accessible.
@@ -27,7 +26,7 @@ async fn main() -> std::io::Result<()> {
             .service(url::get_url)
             .service(url::create_url)
     })
-    .bind(("127.0.0.1", 8080))?
+    .bind("0.0.0.0:8080")?
     .run()
     .await
 }

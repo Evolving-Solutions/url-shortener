@@ -3,7 +3,7 @@ use chrono::prelude::*;
 use mongodb::{bson, bson::doc, Client, Collection, IndexModel};
 use serde::Deserialize;
 
-pub use crate::db::models::Url::Url;
+pub use crate::db::models::url::Url;
 
 /// # Name: URL Getter
 /// Description: Get urls
