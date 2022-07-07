@@ -1416,6 +1416,7 @@ dependencies = [
  "chrono",
  "mongodb",
  "serde",
+ "tokio",
 ]
 
 [[package]]

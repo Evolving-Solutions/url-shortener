@@ -10,10 +10,8 @@ use routes::url;
 /// # Main web server
 /// Serves as the main entry point to the application.
 /// Publicly accessible.
-#[actix_web::main]
+#[tokio::main]
 async fn main() -> std::io::Result<()> {
-
-
     // // List the names of the database in that deployment
     // for db_name in client.list_database_names(None, None).await {
     //     println!("{:#?}", db_name);

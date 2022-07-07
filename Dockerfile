@@ -7,4 +7,9 @@ FROM evolvingsoftware/rust
 
 COPY ./ ./
 
-RUN cargo run
+#EXPOSE 8080/tcp
+
+RUN cargo install --path .
+
+# Default Command
+CMD ["server"]
