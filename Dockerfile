@@ -7,7 +7,7 @@ FROM evolvingsoftware/rust
 
 COPY ./ ./
 
-#EXPOSE 8080/tcp
+EXPOSE 8080/tcp
 
 RUN cargo install --path .
 
