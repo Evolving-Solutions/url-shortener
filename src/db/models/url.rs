@@ -39,8 +39,8 @@ use serde::{Deserialize, Serialize};
 // A url struct that is able to be cloned
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub struct Url {
-    pub longUrl: String,
-    pub shortUrl: String,
-    pub urlCode: String,
-    pub shortenDate: String,
+    pub long_url: String,
+    pub short_url: String,
+    pub url_code: String,
+    pub shorten_date: String,
 }

@@ -2,7 +2,7 @@ use mongodb::{bson::doc, options::IndexOptions, Client, Collection, IndexModel};
 use std::num::ParseIntError;
 
 struct ConnectDB {
-    URI: u32,
+    uri: u32,
     client: Client,
 }
 

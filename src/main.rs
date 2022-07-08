@@ -7,6 +7,9 @@ use mongodb::{bson::doc, options::IndexOptions, Client, Collection, IndexModel};
 use routes::echo::echo;
 use routes::hello::hello;
 use routes::url;
+use crate::controllers::health_check;
+use crate::controllers::health_check::health_check;
+
 /// # Main web server
 /// Serves as the main entry point to the application.
 /// Publicly accessible.
@@ -20,9 +23,11 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .service(hello)
             .service(echo)
+            .service(health_check)
             // Get URL's
             .service(url::get_url)
             .service(url::create_url)
+            .service(health_check::health_check)
     })
     .bind("0.0.0.0:8080")?
     .run()

@@ -17,10 +17,10 @@ pub async fn get_url(client: web::Data<Client>, search: web::Path<String>) -> Ht
     // Specify the collection name
     let collection = client.database("url-shortener").collection("urls");
 
-    let searchParam = search.into_inner();
+    let search_param = search.into_inner();
 
     // Create a filter to search for the URL
-    let filter = doc! {"longUrl": searchParam};
+    let filter = doc! {"long_url": search_param};
 
     // Find the URL
     let url = collection
@@ -41,7 +41,7 @@ pub async fn get_url(client: web::Data<Client>, search: web::Path<String>) -> Ht
 /// URL Struct
 #[derive(Deserialize)]
 struct FormData {
-    longUrl: String,
+    long_url: String,
 }
 
 /// # Path /url
@@ -66,10 +66,10 @@ pub async fn create_url(form: web::Form<FormData>) -> HttpResponse {
 
     // Create a struct to hold the data and model it with the URL struct. Assign the data to the struct.
     let url = Url {
-        longUrl: form.longUrl.clone(),
-        shortUrl: "".to_string(),
-        urlCode: "".to_string(),
-        shortenDate: Utc::now().to_string(),
+        long_url: form.long_url.clone(),
+        short_url: "".to_string(),
+        url_code: "".to_string(),
+        shorten_date: Utc::now().to_string(),
     };
 
     // Get the collection
@@ -83,7 +83,7 @@ pub async fn create_url(form: web::Form<FormData>) -> HttpResponse {
 
     // find the collection that was just created using the Long URL and return all the data
     match collection
-        .find_one(doc! {"longUrl": form.longUrl.clone()}, None)
+        .find_one(doc! {"longUrl": form.long_url.clone()}, None)
         .await
     {
         Ok(result) => match result {
