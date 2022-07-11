@@ -1,5 +1,12 @@
 // Main Routes Module
-pub mod echo;
-pub mod hello;
-pub mod url;
-pub mod health_check;
+mod echo;
+mod hello;
+mod url;
+mod greet;
+mod health_check;
+
+pub use echo;
+pub use hello;
+pub use url;
+pub use greet;
+pub use health_check;
