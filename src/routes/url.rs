@@ -1,16 +1,52 @@
-use std::env;
 use actix_web::{get, post, web, HttpResponse, Responder, Result};
 use chrono::prelude::*;
-use mongodb::{bson, bson::doc, Client, Collection, IndexModel};
+use mongodb::{bson, bson::doc, Client, Collection, Cursor, IndexModel};
 use serde::Deserialize;
+use std::env;
 
 pub use crate::db::models::url::Url;
 
+/// # Name: get_all_urls
+/// Decsription: Gets all the urls in the collection.
+
+// #[get("/url/getAll")]
+// pub async fn get_all_urls() -> HttpResponse {
+//     let uri =
+//         std::env::var("MONGODB_URI").unwrap_or_else(|_| "mongodb+srv://evolvingadmin:FdXCevnY5SkWbaHH@evolving-development.jkdlu.mongodb.net/?retryWrites=true&w=majority".into());
+//
+//     let client = Client::with_uri_str(uri).await.expect("Failed to connect.");
+//
+//     // Specify the collection name
+//     let collection = client.database("url-shortener").collection("urls");
+//
+//     // Create a filter to search for the URL
+//
+//     let all_urls = collection.list_indexes(None).await.unwrap();
+//     while let Some(Ok(index)) = cursor.next().await {
+//         if index.keys == doc! {"_id": 1} {
+//             continue;
+//         } else {
+//             assert_eq!(index.keys, doc! {"index": 1});
+//             assert_eq!(index.clone().options.unwrap().unique, None);
+//             assert_eq!(index.clone().options.unwrap().sparse.unwrap(), true);
+//         }
+//     }
+//     // Return the URL
+//     match all_urls {
+//         Some(all_urls) => {
+//             println("Here is the data you requested: {}", e);
+//             HttpResponse::Ok().finish()
+//         }
+//         None => HttpResponse::NotFound().body("URL not found"),
+//     }
+// }
+
 /// # Name: URL Getter
-/// Description: Get urls
+/// Description: Get a url by refrence
 #[get("/url/{search}")]
 pub async fn get_url(client: web::Data<Client>, search: web::Path<String>) -> HttpResponse {
-    let uri = std::env::var("MONGODB_URI").unwrap_or_else(|_| "mongodb://admin:admin@mongodb".into());
+    let uri =
+        std::env::var("MONGODB_URI").unwrap_or_else(|_| "mongodb+srv://evolvingadmin:FdXCevnY5SkWbaHH@evolving-development.jkdlu.mongodb.net/?retryWrites=true&w=majority".into());
 
     // Specify the database name
     let client = Client::with_uri_str(uri).await.expect("failed to connect");
@@ -60,12 +96,13 @@ struct FormData {
 /// Type: Client
 #[post("/url")]
 pub async fn create_url(form: web::Form<FormData>) -> HttpResponse {
-    let uri = std::env::var("MONGODB_URI").unwrap_or_else(|_| "mongodb://admin:admin@127.0.0.1:27017/".into());
+    let uri = std::env::var("MONGODB_URI").unwrap_or_else(|_| "mongodb+srv://admin:spike2@127.0.0.1:27017/?retryWrites=true&w=majority".into());
 
     // Specify the database name
     let client = Client::with_uri_str(uri).await.expect("failed to connect");
 
     // Create a struct to hold the data and model it with the URL struct. Assign the data to the struct.
+    // This will hold tangible data soon.
     let url = Url {
         long_url: form.long_url.clone(),
         short_url: "".to_string(),
@@ -82,9 +119,10 @@ pub async fn create_url(form: web::Form<FormData>) -> HttpResponse {
         .await
         .expect("Failed to insert document");
 
+
     // find the collection that was just created using the Long URL and return all the data
     match collection
-        .find_one(doc! {"longUrl": form.long_url.clone()}, None)
+        .find_one(doc! {"long_url": form.long_url.clone()}, None)
         .await
     {
         Ok(result) => match result {

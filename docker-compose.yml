@@ -5,7 +5,7 @@ services:
     ports:
       - "4586:8080"
     environment:
-      - MONGODB_URI=mongodb://admin:admin@project-k-dev-api.evolvingsoftware.io/mongo
+      - MONGODB_URI=mongodb://admin:admin@127.0.0.1:27017/url-shortener
   mongodb:
     image: mongo:5.0
     environment:
