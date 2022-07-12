@@ -12,4 +12,5 @@ EXPOSE 5665:8080
 RUN cargo install --path .
 
 # Default Command
+
 CMD ["server"]
