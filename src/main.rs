@@ -5,11 +5,8 @@ use serde_json::json;
 mod controllers;
 mod db;
 mod routes;
-
 use crate::controllers::manual_hello::manual_hello;
-use crate::db::models::url;
-use mongodb::{bson::doc, options::IndexOptions, Client, Collection, IndexModel};
-// use db::connectdb;
+use routes::url;
 
 // Greet function to test
 async fn greet(req: HttpRequest) -> impl Responder {
@@ -55,11 +52,13 @@ async fn main() -> std::io::Result<()> {
             .app_data(handlebars_ref.clone())
             // Register the templates to be used that are stored in the static directory.
             .service(Files::new("/static", "static").show_files_listing())
+            .service(url::get_url)
+            .service(url::create_url)
             .route("/greet", web::get().to(greet))
             .route("/", web::get().to(index_data))
             .route("/hello/{name}", web::get().to(greet))
     })
-    .bind("0.0.0.0:80")?
+    .bind("0.0.0.0:8080")?
     .run()
     .await
 }
