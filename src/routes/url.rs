@@ -1,3 +1,4 @@
+use std::env;
 use actix_web::{get, post, web, HttpResponse, Responder, Result};
 use chrono::prelude::*;
 use mongodb::{bson, bson::doc, Client, Collection, IndexModel};
@@ -9,7 +10,7 @@ pub use crate::db::models::url::Url;
 /// Description: Get urls
 #[get("/url/{search}")]
 pub async fn get_url(client: web::Data<Client>, search: web::Path<String>) -> HttpResponse {
-    let uri = std::env::var("MONGODB_URI").unwrap_or_else(|_| "mongodb://localhost:27017".into());
+    let uri = std::env::var("MONGODB_URI").unwrap_or_else(|_| "mongodb://admin:admin@mongodb".into());
 
     // Specify the database name
     let client = Client::with_uri_str(uri).await.expect("failed to connect");
@@ -59,7 +60,7 @@ struct FormData {
 /// Type: Client
 #[post("/url")]
 pub async fn create_url(form: web::Form<FormData>) -> HttpResponse {
-    let uri = std::env::var("MONGODB_URI").unwrap_or_else(|_| "mongodb://localhost:27017".into());
+    let uri = std::env::var("MONGODB_URI").unwrap_or_else(|_| "mongodb://admin:admin@127.0.0.1:27017/".into());
 
     // Specify the database name
     let client = Client::with_uri_str(uri).await.expect("failed to connect");
