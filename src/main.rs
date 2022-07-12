@@ -41,7 +41,7 @@ async fn main() -> std::io::Result<()> {
     // Declare handlebars as a engine
     let mut handlebars = Handlebars::new();
     handlebars
-        .register_templates_directory(".html", "./static/")
+        .register_templates_directory(".html", "./static")
         .unwrap();
     let handlebars_ref = web::Data::new(handlebars);
 
