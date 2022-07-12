@@ -14,7 +14,7 @@ RUN cargo install --path .
 
 # Install MongoDB
 
-FROM mongo:5.0.9-focal
+FROM mongo:4.4-focal
 COPY --from=builder ./ ./
 
 # Default Command
