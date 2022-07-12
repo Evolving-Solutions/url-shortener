@@ -59,7 +59,7 @@ async fn main() -> std::io::Result<()> {
             .route("/", web::get().to(index_data))
             .route("/hello/{name}", web::get().to(greet))
     })
-    .bind("0.0.0.0:8080")?
+    .bind("0.0.0.0:80")?
     .run()
     .await
 }
