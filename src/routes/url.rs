@@ -1,6 +1,10 @@
 use actix_web::{get, post, web, HttpResponse, Responder, Result};
 use chrono::prelude::*;
-use mongodb::{bson, bson::doc, Client, Collection, Cursor, IndexModel};
+use mongodb::{
+    bson,
+    bson::{doc, Document},
+    Client, Collection, Cursor, IndexModel,
+};
 use serde::Deserialize;
 use std::env;
 
@@ -42,11 +46,11 @@ pub use crate::db::models::url::Url;
 // }
 
 /// # Name: URL Getter
-/// Description: Get a url by refrence
+/// Description: Get a url by refrences
 #[get("/url/{search}")]
 pub async fn get_url(client: web::Data<Client>, search: web::Path<String>) -> HttpResponse {
     let uri =
-        std::env::var("MONGODB_URI").unwrap_or_else(|_| "mongodb+srv://evolvingadmin:FdXCevnY5SkWbaHH@evolving-development.jkdlu.mongodb.net/?retryWrites=true&w=majority".into());
+        std::env::var("MONGODB_URI").unwrap_or_else(|_| "mongodb+srv://admin:spike2@project-k-dev-api.evolvingsoftware.io/url-shortener/?retryWrites=true&w=majority".into());
 
     // Specify the database name
     let client = Client::with_uri_str(uri).await.expect("failed to connect");
@@ -95,23 +99,24 @@ struct FormData {
 /// Name: client
 /// Type: Client
 #[post("/url")]
-pub async fn create_url(form: web::Form<FormData>) -> HttpResponse {
-    let uri = std::env::var("MONGODB_URI").unwrap_or_else(|_| "mongodb+srv://admin:spike2@127.0.0.1:27017/?retryWrites=true&w=majority".into());
+async fn create_url(form: web::Form<FormData>) -> HttpResponse {
+    let uri = std::env::var("MONGODB_URI")
+        .unwrap_or_else(|_| "mongodb://admin:admin@127.0.0.1/?retryWrites=true&w=majority".into());
 
     // Specify the database name
     let client = Client::with_uri_str(uri).await.expect("failed to connect");
 
     // Create a struct to hold the data and model it with the URL struct. Assign the data to the struct.
     // This will hold tangible data soon.
-    let url = Url {
-        long_url: form.long_url.clone(),
-        short_url: "".to_string(),
-        url_code: "".to_string(),
-        shorten_date: Utc::now().to_string(),
+    let url = doc! {
+        "long_url": form.long_url.clone(),
+        "short_url": "".to_string(),
+        "url_code": "".to_string(),
+        "shorten_date": Utc::now().to_string(),
     };
 
     // Get the collection
-    let collection: Collection<Url> = client.database("url-shortener").collection("urls");
+    let collection = client.database("url-shortener").collection("urls");
 
     // Insert the data into the collection
     collection
@@ -119,19 +124,19 @@ pub async fn create_url(form: web::Form<FormData>) -> HttpResponse {
         .await
         .expect("Failed to insert document");
 
-
-    // find the collection that was just created using the Long URL and return all the data
-    match collection
-        .find_one(doc! {"long_url": form.long_url.clone()}, None)
+    // find the collection that was just created using the Long URL.
+    // Return the data back in the response body to the client with JSON.
+    // Use unique index to make sure the URL is unique.
+    let filter = doc! {"long_url": form.long_url.clone()};
+    let url = collection
+        .find_one(Some(filter), None)
         .await
-    {
-        Ok(result) => match result {
-            Some(result) => {
-                let url = result.clone();
-                HttpResponse::Ok().json(url)
-            }
-            None => HttpResponse::Ok().json("Unable to shorten URL, please try again."),
-        },
-        Err(e) => HttpResponse::Ok().json(e.to_string()),
+        .expect("Failed to find URL");
+    match url {
+        Some(url) => {
+            let url: Url = bson::from_bson(bson::Bson::Document(url)).unwrap();
+            HttpResponse::Ok().json(url)
+        }
+        None => HttpResponse::NotFound().body("URL not found"),
     }
 }
