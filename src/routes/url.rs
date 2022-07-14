@@ -161,7 +161,7 @@ async fn create_url(form: web::Form<FormData>) -> HttpResponse {
     // This will hold tangible data soon.
     let url = doc! {
         "long_url": form.long_url.clone(),
-        "short_url": std::env::var("BASE_URL").unwrap_or_else( |_|"http://localhost:8000".into()) + &url_code,
+        "short_url": std::env::var("BASE_URL").unwrap_or_else( |_|"http://localhost:8000".into()) + "/" + &url_code,
         "url_code": url_code.clone(),
         "shorten_date": Utc::now().to_string(),
     };
