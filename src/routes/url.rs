@@ -129,12 +129,7 @@ async fn create_url(form: web::Form<FormData>) -> HttpResponse {
     // if it is not, then we need to check if the code is in the database.
     // if it is, then we need to return the url.
 
-    let url_code;
-    if form.url_code.clone().unwrap() == "" {
-        url_code = generate_url_code();
-    } else {
-        url_code = form.url_code.clone().unwrap();
-    };
+    let url_code= form.url_code.clone().unwrap_or_else(|| generate_url_code());
 
     // println!("{}", generate_url_code());
     // println!(
