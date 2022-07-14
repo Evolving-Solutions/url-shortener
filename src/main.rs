@@ -3,8 +3,8 @@ use actix_web::{web, App, HttpRequest, HttpResponse, HttpServer, Responder};
 use handlebars::Handlebars;
 use serde_json::json;
 mod db;
-mod functions;
 mod routes;
+mod functions;
 use routes::url;
 
 /// Greet function to test
@@ -16,7 +16,7 @@ use routes::url;
  * # Arguments:
  * name: The name of the user.
  * # Returns:
- *
+ * 
  */
 async fn greet(req: HttpRequest) -> impl Responder {
     // Declare a variable to hold a name, if no name add World to the name variable.
