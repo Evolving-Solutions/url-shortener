@@ -25,7 +25,7 @@ use std::env;
 //     let client = Client::with_uri_str(uri).await.expect("Failed to connect.");
 //
 //     // Specify the collection name
-//     let collection = client.database("url-shortener").collection("urls");
+//     let collection = client.database("project-k").collection("url-shortener");
 //
 //     // Create a filter to search for the URL
 //
@@ -54,13 +54,13 @@ use std::env;
 #[get("/url/{search}")]
 pub async fn get_url(client: web::Data<Client>, search: web::Path<String>) -> HttpResponse {
     let uri =
-        std::env::var("MONGODB_URI").unwrap_or_else(|_| "mongodb+srv://admin:spike2@project-k-dev-api.evolvingsoftware.io/url-shortener/?retryWrites=true&w=majority".into());
+        std::env::var("MONGODB_URI").unwrap_or_else(|_| "mongodb+srv://admin:spike2@project-k-dev-api.evolvingsoftware.io/project-k/?retryWrites=true&w=majority".into());
 
     // Specify the database name
     let client = Client::with_uri_str(uri).await.expect("failed to connect");
 
     // Specify the collection name
-    let collection = client.database("url-shortener").collection("urls");
+    let collection = client.database("project-k").collection("url-shortener");
 
     let search_param = search.into_inner();
 
@@ -168,7 +168,7 @@ async fn create_url(form: web::Form<FormData>) -> HttpResponse {
 
     println!("This is the URL Code: {}", url_code.clone());
     // Get the collection
-    let collection = client.database("url-shortener").collection("urls");
+    let collection = client.database("project-k").collection("url-shortener");
 
     // Insert the data into the collection
     collection
