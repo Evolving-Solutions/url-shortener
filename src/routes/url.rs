@@ -1,4 +1,10 @@
-use actix_web::{get, post, web, HttpResponse, Responder, Result};
+pub use crate::db::models::url::Url;
+pub use crate::functions::generate::*;
+use actix_web::{
+    get, post,
+    web::{self, Form},
+    HttpResponse, Responder, Result,
+};
 use chrono::prelude::*;
 use mongodb::{
     bson,
@@ -7,8 +13,6 @@ use mongodb::{
 };
 use serde::Deserialize;
 use std::env;
-
-pub use crate::db::models::url::Url;
 
 /// # Name: get_all_urls
 /// Decsription: Gets all the urls in the collection.
@@ -80,9 +84,11 @@ pub async fn get_url(client: web::Data<Client>, search: web::Path<String>) -> Ht
 }
 
 /// URL Struct
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 struct FormData {
     long_url: String,
+    // a url_code may be present in the request body, but it is not required.
+    url_code: Option<String>,
 }
 
 /// # Path /url
@@ -105,16 +111,62 @@ async fn create_url(form: web::Form<FormData>) -> HttpResponse {
 
     // Specify the database name
     let client = Client::with_uri_str(uri).await.expect("failed to connect");
+    /***
+     * Determine is the request contains a long_url code.
+     * If it does, then we need to check if the code is valid.
+     * If it is valid, then we need to check if the code is already in the database.
+     * If it is, then we need to return the url.
+     * If it is not, then we need generate a new code, then check if it is in the database.
+     * If it is, then we need to return an error, and generate a new code.
+     * If it is not, then we need to insert the url into the database.
+     */
+
+    // Todo: Check if the short_url is already in the database.
+
+    // Declare a mutable variable to hold the url_code from the request or a generated code.
+
+    // check if form.url_code is = Some("");
+    // if it is, then we need to generate a code.
+    // if it is not, then we need to check if the code is in the database.
+    // if it is, then we need to return the url.
+
+    let url_code;
+    if form.url_code.clone().unwrap() == "" {
+        url_code = generate_url_code();
+    } else {
+        url_code = form.url_code.clone().unwrap();
+    };
+
+    // println!("{}", generate_url_code());
+    // println!(
+    //     "THis is the generated code: {}",
+    //     generated_code.clone().to_string()
+    // );
+    // Print the form data to the console.
+
+    // fn get_url_code(form: <FormData>) -> String {
+    //     let mut temp_url_code = form.url_code.clone();
+    //  temp_url_code.get_or_insert(generate_url_code()).to_string()
+    // }
+
+    // Check if the url_code is present in the request body.
+    // if it is not present, then we need to generate a code.
+    // if temp_url_code.is_empty() {
+    //     url_code = generate_url_code().to_string();
+    // } else {
+    //     url_code = form.url_code.clone().to_string();
+    // };
 
     // Create a struct to hold the data and model it with the URL struct. Assign the data to the struct.
     // This will hold tangible data soon.
     let url = doc! {
         "long_url": form.long_url.clone(),
-        "short_url": "".to_string(),
-        "url_code": "".to_string(),
+        "short_url": std::env::var("BASE_URL").unwrap_or_else( |_|"http://localhost:8000".into()) + &url_code,
+        "url_code": url_code.clone(),
         "shorten_date": Utc::now().to_string(),
     };
 
+    println!("This is the URL Code: {}", url_code.clone());
     // Get the collection
     let collection = client.database("url-shortener").collection("urls");
 

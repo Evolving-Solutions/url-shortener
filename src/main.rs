@@ -2,13 +2,22 @@ use actix_files::{Files, NamedFile};
 use actix_web::{web, App, HttpRequest, HttpResponse, HttpServer, Responder};
 use handlebars::Handlebars;
 use serde_json::json;
-mod controllers;
 mod db;
+mod functions;
 mod routes;
-use crate::controllers::manual_hello::manual_hello;
 use routes::url;
 
-// Greet function to test
+/// Greet function to test
+/// # Name: greet
+/**
+ * Description:
+ * This function will greet the user with a message.
+ * It will also return the name of the user.
+ * # Arguments:
+ * name: The name of the user.
+ * # Returns:
+ *
+ */
 async fn greet(req: HttpRequest) -> impl Responder {
     // Declare a variable to hold a name, if no name add World to the name variable.
     let name = req.match_info().get("name").unwrap_or("World");
