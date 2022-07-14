@@ -124,7 +124,6 @@ async fn create_url(form: web::Form<FormData>) -> HttpResponse {
     // Todo: Check if the short_url is already in the database.
 
     // Declare a mutable variable to hold the url_code from the request or a generated code.
-
     // check if form.url_code is = Some("");
     // if it is, then we need to generate a code.
     // if it is not, then we need to check if the code is in the database.
@@ -192,3 +191,5 @@ async fn create_url(form: web::Form<FormData>) -> HttpResponse {
         None => HttpResponse::NotFound().body("URL not found"),
     }
 }
+
+
