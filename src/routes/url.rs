@@ -72,7 +72,6 @@ pub async fn get_url(client: web::Data<Client>, search: web::Path<String>) -> Ht
         .find_one(Some(filter), None)
         .await
         .expect("Failed to find URL");
-
     // Return the URL
     match url {
         Some(url) => {
@@ -129,7 +128,7 @@ async fn create_url(form: web::Form<FormData>) -> HttpResponse {
     // if it is not, then we need to check if the code is in the database.
     // if it is, then we need to return the url.
 
-    let url_code= form.url_code.clone().unwrap_or_else(|| generate_url_code());
+    let url_code = form.url_code.clone().unwrap_or_else(|| generate_url_code());
 
     // println!("{}", generate_url_code());
     // println!(
@@ -186,5 +185,3 @@ async fn create_url(form: web::Form<FormData>) -> HttpResponse {
         None => HttpResponse::NotFound().body("URL not found"),
     }
 }
-
-
