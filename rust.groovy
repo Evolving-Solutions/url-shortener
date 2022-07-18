@@ -7,7 +7,7 @@ job ('Build Project K API') {
     }
     steps {
        dockerBuildAndPublish {
-        repositoryName('evolvingsoftware/projectk-api')
+        repositoryName('evolvingsoftware/business-management-api')
         tag('${GIT_REVISION,length=9')
         registryCredentials('docker')
         createFingerprints(false)
