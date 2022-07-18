@@ -1,6 +1,6 @@
 job ('Build Project K API') {
     scm {
-        git('git@ssh.dev.azure.com:v3/evolving-software/Business%20Management%20and%20Growth%20Platform/backend_server_api')
+        git('https://evolving-software@dev.azure.com/evolving-software/Business%20Management%20and%20Growth%20Platform/_git/backend_server_api')
     }
     triggers {
         scm('H/5 * * * *')
