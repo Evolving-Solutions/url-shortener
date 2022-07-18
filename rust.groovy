@@ -13,6 +13,8 @@ job ('Build Project K API') {
         repositoryName('evolvingsoftware/business-management-api')
         tag('${GIT_REVISION,length=9')
         registryCredentials('docker')
+        forcePull(false)
+        forceTag(false)
         createFingerprints(false)
         skipDecorate()
        }
