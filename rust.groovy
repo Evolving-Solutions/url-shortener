@@ -12,7 +12,7 @@ job ('Build Project K API') {
        dockerBuildAndPublish {
         repositoryName('evolvingsoftware/business-management-api')
         tag('${GIT_REVISION,length=9')
-        registryCredentials('docker')
+        registryCredentials('4e97f946-e36e-4299-b368-28dddb01539b')
         forcePull(false)
         forceTag(false)
         createFingerprints(false)
