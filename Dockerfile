@@ -10,7 +10,8 @@ WORKDIR '/app'
 
 RUN apt-get update
 
-RUN cargo help
+# 2. Copy our cpode
+COPY . .
 
 EXPOSE 8080
 
