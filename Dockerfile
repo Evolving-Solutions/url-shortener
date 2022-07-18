@@ -16,7 +16,7 @@ RUN apt-get update && \
     sed -i 's|session    required     pam_loginuid.so|session    optional     pam_loginuid.so|g' /etc/pam.d/sshd && \
     mkdir -p /var/run/sshd && \
 # Install JDK 8 (latest stable edition at 2019-04-01)
-    apt-get install -qy openjdk-8-jdk && \
+    apt-get install -qy openjdk-11-jdk && \
     # Cleanup old packages
     apt-get -qy autoremove && \
 # Add user jenkins to the image
@@ -41,7 +41,7 @@ CMD ["/usr/sbin/sshd", "-D"]
 
 RUN cargo help
 
-EXPOSE 8080
+EXPOSE 8844
 
 # 3. Build only the dependencies to cache them
 RUN cargo build --release
