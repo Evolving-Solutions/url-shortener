@@ -1,10 +1,13 @@
 use actix_files::{Files, NamedFile};
-use actix_web::{web, App, HttpRequest, HttpResponse, HttpServer, Responder};
+use actix_web::{middleware::Logger, web, App, HttpRequest, HttpResponse, HttpServer, Responder};
 use handlebars::Handlebars;
+use mongodb::Client;
 use serde_json::json;
 mod db;
 mod functions;
 mod routes;
+mod services;
+
 use routes::url;
 
 /// Greet function to test
@@ -33,7 +36,6 @@ async fn index_data(hb: web::Data<Handlebars<'_>>) -> HttpResponse {
     let data = json!({
         "name": "Evolving Software",
     });
-
     //     define the body of the handler and render the data to the template
     let body = hb.render("index", &data).unwrap();
     HttpResponse::Ok().body(body)
@@ -57,12 +59,15 @@ async fn main() -> std::io::Result<()> {
     // }
     HttpServer::new(move || {
         App::new()
+            .wrap(Logger::default())
+            .wrap(Logger::new("%a %{User-Agent}i"))
             // Clone the handlebars ref to the application to give access to the engine.
             .app_data(handlebars_ref.clone())
             // Register the templates to be used that are stored in the static directory.
             .service(Files::new("/static", "static").show_files_listing())
             .service(url::get_url)
             .service(url::create_url)
+            .service(url::redirect_route)
             .route("/greet", web::get().to(greet))
             .route("/", web::get().to(index_data))
             .route("/hello/{name}", web::get().to(greet))
