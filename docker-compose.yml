@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   web:
-    container_name: projeck-server
+    container_name: projectk-server
     image: evolvingsoftware/business-management-api
     ports:
       - "8844:8844"
@@ -10,6 +10,12 @@ services:
     image: mongo:5.0
     ports:
       - "27017:27017"
+    # add user and password to mongodb
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
+      - MONGO_INITDB_DATABASE=projectk
+      - MONGO_INITDB_ROOT_USER_PASSWORD=root
   redis:
     container_name: projectk-redis
     ports:

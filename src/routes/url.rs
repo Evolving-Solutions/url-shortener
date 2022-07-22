@@ -233,3 +233,47 @@ pub async fn redirect_route(url_code: web::Path<String>) -> HttpResponse {
     // },
     // Err(_) => response,
 }
+
+#[get("/api/{url_code}")]
+pub async fn redirect_old_route(url_code: web::Path<String>) -> HttpResponse {
+    // connect to the database
+    let uri = std::env::var("MONGODB_URI")
+        .unwrap_or_else(|_| "mongodb://admin:admin@127.0.0.1/?retryWrites=true&w=majority".into());
+    // Specify the database name
+    let client = Client::with_uri_str(uri).await.expect("failed to connect");
+    println!("Creating client");
+    // refrence the relevant collections
+    let collection = client.database("project-k").collection("url-shortener");
+    println!("Creating collection");
+    let search_param = url_code.into_inner();
+    println!("Creating search param");
+    let filter = doc! {"url_code": search_param };
+    println!("Creating search filter");
+    let long_url = collection
+        .find_one(Some(filter), None)
+        .await
+        .ok()
+        .expect("Error looking for url.");
+    println!("Retrieved URL");
+    // return the long_url
+    println!("Matching URL");
+    let response = HttpResponse::NotFound().body("URL not found");
+    match long_url {
+        Some(url) => {
+            let url: Url = bson::from_bson(bson::Bson::Document(url)).unwrap();
+            HttpResponse::Found()
+                .header("Location", url.long_url)
+                .finish()
+        }
+        None => response,
+    }
+    // Ok(long_url) => {
+    //     println!("Creating long_url from database");
+    //     let long_url: String = bson::from_bson(bson::Bson::Document(long_url)).unwrap();
+    //     println!("Setting response: {}", long_url);
+    //     HttpResponse::Ok()
+    //         .append_header((LOCATION, long_url))
+    //         .finish()
+    // },
+    // Err(_) => response,
+}

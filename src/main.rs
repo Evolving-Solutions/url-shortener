@@ -68,6 +68,7 @@ async fn main() -> std::io::Result<()> {
             .service(url::get_url)
             .service(url::create_url)
             .service(url::redirect_route)
+            .service(url::redirect_old_route)
             .route("/greet", web::get().to(greet))
             .route("/", web::get().to(index_data))
             .route("/hello/{name}", web::get().to(greet))
