@@ -1,8 +1,9 @@
 use actix_files::{Files, NamedFile};
 use actix_web::{middleware::Logger, web, App, HttpRequest, HttpResponse, HttpServer, Responder};
+use env_logger;
 use handlebars::Handlebars;
-use mongodb::Client;
 use serde_json::json;
+use std::env;
 mod db;
 mod functions;
 mod routes;
@@ -46,6 +47,9 @@ async fn index_data(hb: web::Data<Handlebars<'_>>) -> HttpResponse {
 /// Publicly accessible.
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    env::set_var("RUST_LOG", "actix_web=info");
+    env_logger::init();
+    env::set_var("RUST_BACKTRACE", "full");
     // Declare handlebars as a engine
     let mut handlebars = Handlebars::new();
     handlebars

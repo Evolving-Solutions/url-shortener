@@ -156,7 +156,7 @@ pub async fn create_url(form: web::Form<FormData>) -> HttpResponse {
     // This will hold tangible data soon.
     let url = doc! {
         "long_url": form.long_url.clone(),
-        "short_url": std::env::var("BASE_URL").unwrap_or_else( |_|"http://localhost:8000".into()) + "/" + &url_code,
+        "short_url": std::env::var("BASE_URL").unwrap_or_else( |_|"http://localhost:8844".into()) + "/" + &url_code,
         "url_code": url_code.clone(),
         "shorten_date": Utc::now().to_string(),
     };
@@ -260,6 +260,7 @@ pub async fn redirect_old_route(url_code: web::Path<String>) -> HttpResponse {
     let response = HttpResponse::NotFound().body("URL not found");
     match long_url {
         Some(url) => {
+            println!("Creating long_url from database: {}", url);
             let url: Url = bson::from_bson(bson::Bson::Document(url)).unwrap();
             HttpResponse::Found()
                 .header("Location", url.long_url)
