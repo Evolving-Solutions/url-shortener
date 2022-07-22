@@ -1,18 +1,16 @@
 version: "3.9"
 services:
   web:
-    container_name: projectk-api
-    build: .
+    image: evolvingsoftware/business-management-api
     ports:
-      - "4586:8080"
-    environment:
-      - MONGODB_URI=mongodb://admin:admin@127.0.0.1:27017/url-shortener
+      - "8844:8844"
   mongodb:
     container_name: projectk-mongodb
     image: mongo:5.0
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=admin
-      - MONGO_INITDB_ROOT_PASSWORD=spike2
-      - MONGO_INITDB_DATABASE=test
     ports:
       - "27017:27017"
+  redis:
+    ports:
+      - "6379:6379"
+    image: redis:5.0
+    
