@@ -13,8 +13,6 @@ RUN apt-get update
 # 2. Copy our cpode
 COPY . .
 
-EXPOSE 8080
-
 # 3. Build only the dependencies to cache them
 RUN cargo build --release
 
