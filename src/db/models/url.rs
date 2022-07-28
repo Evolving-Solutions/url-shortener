@@ -1,3 +1,4 @@
+use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
 
 /// # Name: URL Struct
@@ -37,7 +38,7 @@ use serde::{Deserialize, Serialize};
 ///
 
 // A url struct that is able to be cloned
-#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Debug, Clone, Apiv2Schema)]
 pub struct Url {
     pub long_url: String,
     pub short_url: String,

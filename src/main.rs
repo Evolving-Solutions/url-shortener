@@ -1,7 +1,17 @@
 use actix_files::{Files, NamedFile};
-use actix_web::{middleware::Logger, web, App, HttpRequest, HttpResponse, HttpServer, Responder};
+use actix_web::{middleware::Logger, App, HttpRequest, HttpResponse, HttpServer, Responder};
 use env_logger;
 use handlebars::Handlebars;
+use paperclip::actix::{
+    api_v2_operation,
+    // If you prefer the macro syntax for defining routes, import the paperclip macros
+    // get, post, put, delete
+    // use this instead of actix_web::web
+    web::{self, Json, Route},
+    Apiv2Schema,
+    // extension trait for actix_web::App and proc-macro attributes
+    OpenApiExt,
+};
 use serde_json::json;
 use std::env;
 mod db;
@@ -53,29 +63,35 @@ async fn main() -> std::io::Result<()> {
     // Declare handlebars as a engine
     let mut handlebars = Handlebars::new();
     handlebars
-        .register_templates_directory(".html", "./static")
+        .register_templates_directory(".html", "./static/Website_Templates")
         .unwrap();
     let handlebars_ref = web::Data::new(handlebars);
 
     // // List the names of the database in that deployment
     // for db_name in client.list_database_names(None, None).await {
-    //     println!("{:#?}", db_name);
-    // }
-    HttpServer::new(move || {
+    //         println!("{:#?}", db_name);
+    //     }
+    HttpServer::new(|| {
         App::new()
-            .wrap(Logger::default())
-            .wrap(Logger::new("%a %{User-Agent}i"))
-            // Clone the handlebars ref to the application to give access to the engine.
-            .app_data(handlebars_ref.clone())
-            // Register the templates to be used that are stored in the static directory.
-            .service(Files::new("/static", "static").show_files_listing())
-            .service(url::get_url)
-            .service(url::create_url)
-            .service(url::redirect_route)
-            .service(url::redirect_old_route)
-            .route("/greet", web::get().to(greet))
-            .route("/", web::get().to(index_data))
-            .route("/hello/{name}", web::get().to(greet))
+            .wrap_api()
+            //     .wrap(Logger::default())
+            //     .wrap(Logger::new("%a %{User-Agent}i"))
+            //     // Clone the handlebars ref to the application to give access to the engine.
+            //     .app_data(handlebars_ref.clone())
+            //     // Register the templates to be used that are stored in the static directory.
+            //     // .service(Files::new("/static", "static").show_files_listing())
+            //     // .route("/", web::get().to(index_data))
+            //     // .service(url::get_url)
+            //     // .service(url::create_url)
+            //     // .service(url::redirect_route)
+            .route(
+                "/web/{url}",
+                web::post().to(routes::url::redirect_old_route),
+            )
+            //     // .route("/greet", web::get().to(greet))
+            //     // .route("/hello/{name}", web::get().to(greet))
+            .with_json_spec_at("/api/spec/v2")
+            .build()
     })
     .bind("0.0.0.0:8844")?
     .run()

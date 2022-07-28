@@ -1,19 +1,24 @@
 pub use crate::db::models::url::Url;
 pub use crate::functions::generate::*;
-use actix_web::{
-    get,
-    http::header::LOCATION,
-    post,
-    web::{self, Form},
-    HttpResponse, Responder, Result,
-};
+use actix_web::{get, post, Error, HttpResponse};
 use chrono::prelude::*;
 use mongodb::{
     bson,
     bson::{doc, Document},
     Client, Collection, Cursor, IndexModel,
 };
-use serde::Deserialize;
+use paperclip::actix::{
+    api_v2_operation,
+    // If you prefer the macro syntax for defining routes, import the paperclip macros
+    // get, post, put, delete
+    // use this instead of actix_web::web
+    web::{self, Json},
+    Apiv2Schema,
+    HttpResponseWrapper,
+    // extension trait for actix_web::App and proc-macro attributes
+    OpenApiExt,
+};
+use serde::{Deserialize, Serialize};
 use std::env;
 
 /// # Name: get_all_urls
@@ -53,6 +58,7 @@ use std::env;
 
 /// # Name: URL Getter
 /// Description: Get a url by refrences
+#[api_v2_operation]
 #[get("/url/?{search}")]
 pub async fn get_url(client: web::Data<Client>, search: web::Path<String>) -> HttpResponse {
     let uri =
@@ -85,7 +91,7 @@ pub async fn get_url(client: web::Data<Client>, search: web::Path<String>) -> Ht
 }
 
 /// URL Struct
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Apiv2Schema, Debug)]
 pub struct FormData {
     long_url: String,
     // a url_code may be present in the request body, but it is not required.
@@ -105,6 +111,8 @@ pub struct FormData {
 ///
 /// Name: client
 /// Type: Client
+///
+#[api_v2_operation]
 #[post("/url")]
 pub async fn create_url(form: web::Form<FormData>) -> HttpResponse {
     let uri = std::env::var("MONGODB_URI")
@@ -189,7 +197,8 @@ pub async fn create_url(form: web::Form<FormData>) -> HttpResponse {
 }
 
 //Get URL by Short URL
-
+// Mark operations like so...
+#[api_v2_operation]
 #[get("/{url_code}")]
 pub async fn redirect_route(url_code: web::Path<String>) -> HttpResponse {
     // connect to the database
@@ -234,7 +243,7 @@ pub async fn redirect_route(url_code: web::Path<String>) -> HttpResponse {
     // Err(_) => response,
 }
 
-#[get("/api/{url_code}")]
+#[api_v2_operation]
 pub async fn redirect_old_route(url_code: web::Path<String>) -> HttpResponse {
     // connect to the database
     let uri = std::env::var("MONGODB_URI")
