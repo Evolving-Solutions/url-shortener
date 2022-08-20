@@ -7,15 +7,7 @@
 FROM evolvingsoftware/rust as rust
 
 WORKDIR '/app'
-
-RUN apt-get update
-
-# 2. Copy our cpode
-COPY . .
-
-# 3. Build only the dependencies to cache them
-RUN cargo build --release
-
+# 2. Copy the binary to the local binary folder
+COPY ./target/release/url_shortener /usr/local/bin/url_shortener
 # When `docker run` is executed, launch the binary!
-ENTRYPOINT ["./target/release/server"]
-
+CMD ["url_shortener"]

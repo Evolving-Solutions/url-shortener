@@ -1,24 +1,15 @@
 version: "3.9"
 services:
   web:
-    container_name: projectk-server
-    image: evolvingsoftware/business-management-api
+    container_name: evolving_solutions_url_shortener_api
+    image: evolvingsoftware/evolving_solutions_url_shortener_api
     ports:
-      - "8844:8844"
+      - "8080:8080"
   mongodb:
-    container_name: projectk-mongodb
+    container_name: mongodb
     image: mongo:5.0
     ports:
       - "27017:27017"
     # add user and password to mongodb
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=root
-      - MONGO_INITDB_ROOT_PASSWORD=root
-      - MONGO_INITDB_DATABASE=projectk
-      - MONGO_INITDB_ROOT_USER_PASSWORD=root
-  redis:
-    container_name: projectk-redis
-    ports:
-      - "6379:6379"
-    image: redis:5.0
-    
+      - MONGO_INITDB_DATABASE=evolving_solutions

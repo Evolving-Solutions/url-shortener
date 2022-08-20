@@ -1,23 +1,23 @@
 pub use crate::db::models::url::Url;
 pub use crate::functions::generate::*;
-use actix_web::{get, post, Error, HttpResponse};
+use actix_web::{delete, get, http::header, post, web, Error, HttpResponse};
 use chrono::prelude::*;
 use mongodb::{
     bson,
     bson::{doc, Document},
     Client, Collection, Cursor, IndexModel,
 };
-use paperclip::actix::{
-    api_v2_operation,
-    // If you prefer the macro syntax for defining routes, import the paperclip macros
-    // get, post, put, delete
-    // use this instead of actix_web::web
-    web::{self, Json},
-    Apiv2Schema,
-    HttpResponseWrapper,
-    // extension trait for actix_web::App and proc-macro attributes
-    OpenApiExt,
-};
+// use paperclip::actix::{
+//     api_v2_operation,
+//     // If you prefer the macro syntax for defining routes, import the paperclip macros
+//     // get, post, put, delete
+//     // use this instead of actix_web::web
+//     web::{self, Json},
+//     Apiv2Schema,
+//     HttpResponseWrapper,
+//     // extension trait for actix_web::App and proc-macro attributes
+//     OpenApiExt,
+// };
 use serde::{Deserialize, Serialize};
 use std::env;
 
@@ -32,7 +32,7 @@ use std::env;
 //     let client = Client::with_uri_str(uri).await.expect("Failed to connect.");
 //
 //     // Specify the collection name
-//     let collection = client.database("project-k").collection("url-shortener");
+//     let collection = client.database("evolving_solutions").collection("url-shortener");
 //
 //     // Create a filter to search for the URL
 //
@@ -58,17 +58,18 @@ use std::env;
 
 /// # Name: URL Getter
 /// Description: Get a url by refrences
-#[api_v2_operation]
+// #[api_v2_operation]
 #[get("/url/?{search}")]
 pub async fn get_url(client: web::Data<Client>, search: web::Path<String>) -> HttpResponse {
-    let uri =
-        std::env::var("MONGODB_URI").unwrap_or_else(|_| "mongodb+srv://admin:spike2@project-k-dev-api.evolvingsoftware.io/project-k/?retryWrites=true&w=majority".into());
+    let uri = std::env::var("MONGODB_URI").unwrap_or_else(|_| {
+        "mongodb+srv://127.0.0.1:27017/evolving_solutions/?retryWrites=true&w=majority".into()
+    });
 
     // Specify the database name
     let client = Client::with_uri_str(uri).await.expect("failed to connect");
 
     // Specify the collection name
-    let collection = client.database("project-k").collection("url-shortener");
+    let collection = client.database("url_shortner").collection("url-shortener");
 
     let search_param = search.into_inner();
 
@@ -91,7 +92,7 @@ pub async fn get_url(client: web::Data<Client>, search: web::Path<String>) -> Ht
 }
 
 /// URL Struct
-#[derive(Serialize, Deserialize, Apiv2Schema, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct FormData {
     long_url: String,
     // a url_code may be present in the request body, but it is not required.
@@ -112,11 +113,11 @@ pub struct FormData {
 /// Name: client
 /// Type: Client
 ///
-#[api_v2_operation]
+// #[api_v2_operation]
 #[post("/url")]
 pub async fn create_url(form: web::Form<FormData>) -> HttpResponse {
     let uri = std::env::var("MONGODB_URI")
-        .unwrap_or_else(|_| "mongodb://admin:admin@127.0.0.1/?retryWrites=true&w=majority".into());
+        .unwrap_or_else(|_| "mongodb://127.0.0.1:27017/?retryWrites=true&w=majority".into());
 
     // Specify the database name
     let client = Client::with_uri_str(uri).await.expect("failed to connect");
@@ -140,38 +141,22 @@ pub async fn create_url(form: web::Form<FormData>) -> HttpResponse {
 
     let url_code = form.url_code.clone().unwrap_or_else(|| generate_url_code());
 
-    // println!("{}", generate_url_code());
-    // println!(
-    //     "THis is the generated code: {}",
-    //     generated_code.clone().to_string()
-    // );
-    // Print the form data to the console.
-
-    // fn get_url_code(form: <FormData>) -> String {
-    //     let mut temp_url_code = form.url_code.clone();
-    //  temp_url_code.get_or_insert(generate_url_code()).to_string()
-    // }
-
-    // Check if the url_code is present in the request body.
-    // if it is not present, then we need to generate a code.
-    // if temp_url_code.is_empty() {
-    //     url_code = generate_url_code().to_string();
-    // } else {
-    //     url_code = form.url_code.clone().to_string();
-    // };
-
     // Create a struct to hold the data and model it with the URL struct. Assign the data to the struct.
     // This will hold tangible data soon.
     let url = doc! {
         "long_url": form.long_url.clone(),
-        "short_url": std::env::var("BASE_URL").unwrap_or_else( |_|"http://localhost:8844".into()) + "/" + &url_code,
+        "short_url": std::env::var("BASE_URL").unwrap_or_else( |_|"http://localhost:8080".into()) + "/" + &url_code,
         "url_code": url_code.clone(),
         "shorten_date": Utc::now().to_string(),
     };
 
     println!("This is the URL Code: {}", url_code.clone());
+    // check if database collection evolving_solutions exists if it does not then create it.
+
     // Get the collection
-    let collection = client.database("project-k").collection("url-shortener");
+    let collection = client
+        .database("evolving_solutions")
+        .collection("url_shortner");
 
     // Insert the data into the collection
     collection
@@ -196,19 +181,49 @@ pub async fn create_url(form: web::Form<FormData>) -> HttpResponse {
     }
 }
 
+/// Delete a URL from the database
+/// #[api_v2_operation]
+#[delete("/{url_code}")]
+pub async fn delete_url(url_code: web::Path<String>) -> HttpResponse {
+    // connect to the database
+    let uri = std::env::var("MONGODB_URI")
+        .unwrap_or_else(|_| "mongodb://127.0.0.1:27017/?retryWrites=true&w=majority".into());
+
+    let search_param = url_code.into_inner();
+    let filter = doc! {"url_code": search_param };
+    // Specify the database name
+    let client = Client::with_uri_str(uri).await.expect("failed to connect");
+    let collection: Collection<Document> = client
+        .database("evolving_solutions")
+        .collection("url_shortner");
+
+    let result = collection
+        .delete_one(filter, None)
+        .await
+        .expect("Error deleting URL");
+    println!("Deleted URL");
+
+    match result.deleted_count {
+        1 => HttpResponse::Ok().body("URL deleted"),
+        _ => HttpResponse::NotFound().body("URL not found"),
+    }
+}
+
 //Get URL by Short URL
 // Mark operations like so...
-#[api_v2_operation]
+// #[api_v2_operation]
 #[get("/{url_code}")]
 pub async fn redirect_route(url_code: web::Path<String>) -> HttpResponse {
     // connect to the database
     let uri = std::env::var("MONGODB_URI")
-        .unwrap_or_else(|_| "mongodb://admin:admin@127.0.0.1/?retryWrites=true&w=majority".into());
+        .unwrap_or_else(|_| "mongodb://127.0.0.1:27017/?retryWrites=true&w=majority".into());
     // Specify the database name
     let client = Client::with_uri_str(uri).await.expect("failed to connect");
     println!("Creating client");
     // refrence the relevant collections
-    let collection = client.database("project-k").collection("url-shortener");
+    let collection = client
+        .database("evolving_solutions")
+        .collection("url-shortener");
     println!("Creating collection");
     let search_param = url_code.into_inner();
     println!("Creating search param");
@@ -227,63 +242,9 @@ pub async fn redirect_route(url_code: web::Path<String>) -> HttpResponse {
         Some(url) => {
             let url: Url = bson::from_bson(bson::Bson::Document(url)).unwrap();
             HttpResponse::Found()
-                .header("Location", url.long_url)
+                .append_header(("LOCATION", url.long_url))
                 .finish()
         }
         None => response,
     }
-    // Ok(long_url) => {
-    //     println!("Creating long_url from database");
-    //     let long_url: String = bson::from_bson(bson::Bson::Document(long_url)).unwrap();
-    //     println!("Setting response: {}", long_url);
-    //     HttpResponse::Ok()
-    //         .append_header((LOCATION, long_url))
-    //         .finish()
-    // },
-    // Err(_) => response,
-}
-
-#[api_v2_operation]
-pub async fn redirect_old_route(url_code: web::Path<String>) -> HttpResponse {
-    // connect to the database
-    let uri = std::env::var("MONGODB_URI")
-        .unwrap_or_else(|_| "mongodb://admin:admin@127.0.0.1/?retryWrites=true&w=majority".into());
-    // Specify the database name
-    let client = Client::with_uri_str(uri).await.expect("failed to connect");
-    println!("Creating client");
-    // refrence the relevant collections
-    let collection = client.database("project-k").collection("url-shortener");
-    println!("Creating collection");
-    let search_param = url_code.into_inner();
-    println!("Creating search param");
-    let filter = doc! {"url_code": search_param };
-    println!("Creating search filter");
-    let long_url = collection
-        .find_one(Some(filter), None)
-        .await
-        .ok()
-        .expect("Error looking for url.");
-    println!("Retrieved URL");
-    // return the long_url
-    println!("Matching URL");
-    let response = HttpResponse::NotFound().body("URL not found");
-    match long_url {
-        Some(url) => {
-            println!("Creating long_url from database: {}", url);
-            let url: Url = bson::from_bson(bson::Bson::Document(url)).unwrap();
-            HttpResponse::Found()
-                .header("Location", url.long_url)
-                .finish()
-        }
-        None => response,
-    }
-    // Ok(long_url) => {
-    //     println!("Creating long_url from database");
-    //     let long_url: String = bson::from_bson(bson::Bson::Document(long_url)).unwrap();
-    //     println!("Setting response: {}", long_url);
-    //     HttpResponse::Ok()
-    //         .append_header((LOCATION, long_url))
-    //         .finish()
-    // },
-    // Err(_) => response,
 }
