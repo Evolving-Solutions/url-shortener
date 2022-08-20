@@ -1,9 +1,11 @@
 use actix_files::{Files, NamedFile};
-use actix_web::{middleware::Logger, web, App, HttpRequest, HttpResponse, HttpServer, Responder};
+use actix_web::{
+    middleware::Logger, web, App, HttpRequest, HttpResponse, HttpServer, Responder, Result,
+};
 use env_logger;
 use routes::url;
 use serde_json::json;
-use std::env;
+use std::{env, path::PathBuf};
 // use paperclip::actix::{
 //     api_v2_operation,
 //     // If you prefer the macro syntax for defining routes, import the paperclip macros
@@ -19,6 +21,13 @@ mod functions;
 mod routes;
 mod services;
 
+/// Serve index.html as a static file
+/// GET /
+async fn index(req: HttpRequest) -> Result<NamedFile> {
+    let path: PathBuf = "./static/index.html".parse().unwrap();
+    Ok(NamedFile::open(path)?)
+}
+
 /// # Main web server
 /// Serves as the main entry point to the application.
 /// Publicly accessible.
@@ -29,14 +38,14 @@ async fn main() -> std::io::Result<()> {
     env::set_var("RUST_BACKTRACE", "full");
     HttpServer::new(|| {
         App::new()
-            // .route("/web/{url}", web::get().to(routes::url::redirect_old_route))
+            .route("/", web::get().to(index))
             .service(url::get_url)
             .service(url::create_url)
             .service(url::redirect_route)
             .service(url::delete_url)
         // .with_json_spec_at("/api/spec/v2")
     })
-    .bind("0.0.0.0:8080")?
+    .bind("127.0.0.1:8080")?
     .run()
     .await
 }
