@@ -45,7 +45,7 @@ async fn main() -> std::io::Result<()> {
             .service(url::delete_url)
         // .with_json_spec_at("/api/spec/v2")
     })
-    .bind("127.0.0.1:8080")?
+    .bind("0.0.0.0:8844")?
     .run()
     .await
 }

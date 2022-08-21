@@ -4,7 +4,7 @@ services:
     container_name: evolving_solutions_url_shortener_api
     image: evolvingsoftware/evolving_solutions_url_shortener_api:alpha
     ports:
-      - "8080:8080"
+      - "8844:8844"
   mongodb:
     container_name: mongodb
     image: mongo:5.0
