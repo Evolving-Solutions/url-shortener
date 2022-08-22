@@ -387,6 +387,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c1ad822118d20d2c234f427000d5acc36eabe1e29a348c89b63dd60b13f28e5d"
 
 [[package]]
+name = "byteorder"
+version = "1.4.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "14c189c53d098945499cdfa7ecc63567cf3886b3332b312a5b4585d8d3a6a610"
+
+[[package]]
 name = "bytes"
 version = "1.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1199,6 +1205,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "local-ip-address"
+version = "0.4.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "74d6f43d42d775afa8073bfa6aba569b340a3635efa8c9f7702c9c6ed209692f"
+dependencies = [
+ "libc",
+ "neli",
+ "thiserror",
+ "windows-sys",
+]
+
+[[package]]
 name = "local-waker"
 version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1359,6 +1377,16 @@ dependencies = [
  "security-framework",
  "security-framework-sys",
  "tempfile",
+]
+
+[[package]]
+name = "neli"
+version = "0.5.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9053554eb5dcb7e10d9cdab1206965bde870eed5d0d341532ca035e3ba221508"
+dependencies = [
+ "byteorder",
+ "libc",
 ]
 
 [[package]]
@@ -2568,6 +2596,7 @@ dependencies = [
  "chrono",
  "env_logger 0.9.0",
  "keycloak",
+ "local-ip-address",
  "mongodb",
  "paperclip",
  "random-string",
