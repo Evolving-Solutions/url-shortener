@@ -27,9 +27,15 @@ use std::env;
 
 // #[get("/url/getAll")]
 // pub async fn get_all_urls() -> HttpResponse {
-//     let uri =
-//         std::env::var("MONGODB_URI").unwrap_or_else(|_| "mongodb+srv://evolvingadmin:FdXCevnY5SkWbaHH@evolving-development.jkdlu.mongodb.net/?retryWrites=true&w=majority".into());
 //
+// create a mongo connection url that uses the local ip address
+// let local_ip = local_ip().unwrap();
+// let mongo_prefix = "mongodb+srv://";
+// let mongo_prefix_and_ip = mongo_prefix + &local_ip.to_string();
+// let mongo_uri = mongo_prefix_and_ip + ":27017";
+// let mongo_connection_string = mongo_uri + "/evolving_solutions?retryWrites=true&w=majority";
+// let uri = std::env::var("MONGODB_URI").unwrap_or_else(|_| mongo_connection_string.into());
+
 //     let client = Client::with_uri_str(uri).await.expect("Failed to connect.");
 //
 //     // Specify the collection name
