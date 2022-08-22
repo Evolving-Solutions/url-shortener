@@ -8,8 +8,14 @@ FROM evolvingsoftware/rust as rust
 
 WORKDIR '/app'
 # 2. Copy the binary to the local binary folder
-COPY ./target/release/url_shortener /usr/local/bin/url_shortener
 
 COPY ./ ./
+
+RUN apt-get install pkg-config -y
+
+RUN apt-get install libssl-dev -y
+
+RUN cargo build --release
+
 # When `docker run` is executed, launch the binary!
-CMD ["url_shortener"]
+ENTRYPOINT ["./target/release/url_shortener"]

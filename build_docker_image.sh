@@ -6,10 +6,10 @@
 # Builds the Docker image for the application.
 # sudo apt autoremove -y
 # sudo apt-get install lld clang -y
-rm -r ./target/
-# cargo install cargo-watch --force
-# echo "printing for update"
-cargo install --path .
+# rm -r ./target/
+# # cargo install cargo-watch --force
+# # echo "printing for update"
+# cargo install --path .
 
 docker build  -t evolvingsoftware/evolving_solutions_url_shortener_api:alpha .
 
