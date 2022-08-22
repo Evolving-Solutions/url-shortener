@@ -5,6 +5,8 @@ services:
     image: evolvingsoftware/evolving_solutions_url_shortener_api:alpha
     ports:
       - "8844:8844"
+    enviornment:
+      - SERVER_IP=
   mongodb:
     container_name: mongodb
     image: mongo:5.0

@@ -2,6 +2,7 @@ pub use crate::db::models::url::Url;
 pub use crate::functions::generate::*;
 use actix_web::{delete, get, http::header, post, web, Error, HttpResponse};
 use chrono::prelude::*;
+use local_ip_address::local_ip;
 use mongodb::{
     bson,
     bson::{doc, Document},
@@ -61,9 +62,13 @@ use std::env;
 // #[api_v2_operation]
 #[get("/url/?{search}")]
 pub async fn get_url(client: web::Data<Client>, search: web::Path<String>) -> HttpResponse {
-    let uri = std::env::var("MONGODB_URI").unwrap_or_else(|_| {
-        "mongodb+srv://127.0.0.1:27017/evolving_solutions/?retryWrites=true&w=majority".into()
-    });
+    // create a mongo connection url that uses the local ip address
+    let local_ip = local_ip().unwrap();
+    let mongo_prefix = "mongodb+srv://";
+    let mongo_prefix_and_ip = mongo_prefix + &local_ip.to_string();
+    let mongo_uri = mongo_prefix_and_ip + ":27017";
+    let mongo_connection_string = mongo_uri + "/evolving_solutions?retryWrites=true&w=majority";
+    let uri = std::env::var("MONGODB_URI").unwrap_or_else(|_| mongo_connection_string.into());
 
     // Specify the database name
     let client = Client::with_uri_str(uri).await.expect("failed to connect");
@@ -116,8 +121,12 @@ pub struct FormData {
 // #[api_v2_operation]
 #[post("/url")]
 pub async fn create_url(form: web::Form<FormData>) -> HttpResponse {
-    let uri = std::env::var("MONGODB_URI")
-        .unwrap_or_else(|_| "mongodb://127.0.0.1:27017/?retryWrites=true&w=majority".into());
+    let local_ip = local_ip().unwrap();
+    let mongo_prefix = "mongodb+srv://";
+    let mongo_prefix_and_ip = mongo_prefix + &local_ip.to_string();
+    let mongo_uri = mongo_prefix_and_ip + ":27017";
+    let mongo_connection_string = mongo_uri + "/evolving_solutions?retryWrites=true&w=majority";
+    let uri = std::env::var("MONGODB_URI").unwrap_or_else(|_| mongo_connection_string.into());
 
     // Specify the database name
     let client = Client::with_uri_str(uri).await.expect("failed to connect");
@@ -186,8 +195,12 @@ pub async fn create_url(form: web::Form<FormData>) -> HttpResponse {
 #[delete("/{url_code}")]
 pub async fn delete_url(url_code: web::Path<String>) -> HttpResponse {
     // connect to the database
-    let uri = std::env::var("MONGODB_URI")
-        .unwrap_or_else(|_| "mongodb://127.0.0.1:27017/?retryWrites=true&w=majority".into());
+    let local_ip = local_ip().unwrap();
+    let mongo_prefix = "mongodb+srv://";
+    let mongo_prefix_and_ip = mongo_prefix + &local_ip.to_string();
+    let mongo_uri = mongo_prefix_and_ip + ":27017";
+    let mongo_connection_string = mongo_uri + "/evolving_solutions?retryWrites=true&w=majority";
+    let uri = std::env::var("MONGODB_URI").unwrap_or_else(|_| mongo_connection_string.into());
 
     let search_param = url_code.into_inner();
     let filter = doc! {"url_code": search_param };
@@ -215,8 +228,12 @@ pub async fn delete_url(url_code: web::Path<String>) -> HttpResponse {
 #[get("/{url_code}")]
 pub async fn redirect_route(url_code: web::Path<String>) -> HttpResponse {
     // connect to the database
-    let uri = std::env::var("MONGODB_URI")
-        .unwrap_or_else(|_| "mongodb://127.0.0.1:27017/?retryWrites=true&w=majority".into());
+    let local_ip = local_ip().unwrap();
+    let mongo_prefix = "mongodb+srv://";
+    let mongo_prefix_and_ip = mongo_prefix + &local_ip.to_string();
+    let mongo_uri = mongo_prefix_and_ip + ":27017";
+    let mongo_connection_string = mongo_uri + "/evolving_solutions?retryWrites=true&w=majority";
+    let uri = std::env::var("MONGODB_URI").unwrap_or_else(|_| mongo_connection_string.into());
     // Specify the database name
     let client = Client::with_uri_str(uri).await.expect("failed to connect");
     println!("Creating client");
