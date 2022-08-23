@@ -1,30 +1,16 @@
-use actix_files::{Files, NamedFile};
-use actix_web::{
-    middleware::Logger, web, App, HttpRequest, HttpResponse, HttpServer, Responder, Result,
-};
+use actix_files::NamedFile;
+use actix_web::{web, App, HttpRequest, HttpServer, Result};
 use env_logger;
 use local_ip_address::local_ip;
 use routes::url;
-use serde_json::json;
 use std::{env, path::PathBuf};
-// use paperclip::actix::{
-//     api_v2_operation,
-//     // If you prefer the macro syntax for defining routes, import the paperclip macros
-//     // get, post, put, delete
-//     // use this instead of actix_web::web
-//     web::{self, Json, Route},
-//     Apiv2Schema,
-//     // extension trait for actix_web::App and proc-macro attributes
-//     OpenApiExt,
-// };
 mod db;
 mod functions;
 mod routes;
-mod services;
 
 /// Serve index.html as a static file
 /// GET /
-async fn index(req: HttpRequest) -> Result<NamedFile> {
+async fn index(_req: HttpRequest) -> Result<NamedFile> {
     let path: PathBuf = "./static/index.html".parse().unwrap();
     Ok(NamedFile::open(path)?)
 }
@@ -55,5 +41,4 @@ async fn main() -> std::io::Result<()> {
     .bind(server_w_port)?
     .run()
     .await
-
 }

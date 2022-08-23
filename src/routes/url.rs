@@ -1,26 +1,23 @@
+use crate::db;
 pub use crate::db::models::url::Url;
 pub use crate::functions::generate::*;
-use actix_web::{delete, get, http::header, post, web, Error, HttpResponse};
+use actix_web::{delete, get, post, web, HttpResponse};
 use chrono::prelude::*;
-use local_ip_address::local_ip;
+use db::connectdb::database::connect_db;
 use mongodb::{
     bson,
     bson::{doc, Document},
-    Client, Collection, Cursor, IndexModel,
+    Collection,
 };
-// use paperclip::actix::{
-//     api_v2_operation,
-//     // If you prefer the macro syntax for defining routes, import the paperclip macros
-//     // get, post, put, delete
-//     // use this instead of actix_web::web
-//     web::{self, Json},
-//     Apiv2Schema,
-//     HttpResponseWrapper,
-//     // extension trait for actix_web::App and proc-macro attributes
-//     OpenApiExt,
-// };
 use serde::{Deserialize, Serialize};
-use std::env;
+
+/// URL Struct
+#[derive(Serialize, Deserialize, Debug)]
+pub struct FormData {
+    long_url: String,
+    // a url_code may be present in the request body, but it is not required.
+    url_code: Option<String>,
+}
 
 /// # Name: get_all_urls
 /// Decsription: Gets all the urls in the collection.
@@ -67,13 +64,9 @@ use std::env;
 /// Description: Get a url by refrences
 // #[api_v2_operation]
 #[get("/url/?{search}")]
-pub async fn get_url(client: web::Data<Client>, search: web::Path<String>) -> HttpResponse {
+pub async fn get_url(search: web::Path<String>) -> HttpResponse {
     // create a mongo connection url that uses the local ip address
-    let mongo_connection_string = "mongodb://45.56.109.174:27017/evolving_solutions?retryWrites=true&w=majority";
-    let uri = std::env::var("MONGODB_URI").unwrap_or_else(|_| mongo_connection_string.into());
-
-    // Specify the database name
-    let client = Client::with_uri_str(mongo_connection_string).await.expect("failed to connect");
+    let client = connect_db().await;
 
     // Specify the collection name
     let collection = client.database("url_shortner").collection("url-shortener");
@@ -98,14 +91,6 @@ pub async fn get_url(client: web::Data<Client>, search: web::Path<String>) -> Ht
     }
 }
 
-/// URL Struct
-#[derive(Serialize, Deserialize, Debug)]
-pub struct FormData {
-    long_url: String,
-    // a url_code may be present in the request body, but it is not required.
-    url_code: Option<String>,
-}
-
 /// # Path /url
 ///
 /// Request Type: POST
@@ -123,10 +108,8 @@ pub struct FormData {
 // #[api_v2_operation]
 #[post("/url")]
 pub async fn create_url(form: web::Form<FormData>) -> HttpResponse {
-   // create a mongo connection url that uses the local ip address
-    let mongo_connection_string = "mongodb://45.56.109.174:27017/evolving_solutions?retryWrites=true&w=majority";
-    // Specify the database name
-    let client = Client::with_uri_str(mongo_connection_string).await.expect("failed to connect");
+    // create a mongo connection url that uses the local ip address
+    let client = connect_db().await;
     /***
      * Determine is the request contains a long_url code.
      * If it does, then we need to check if the code is valid.
@@ -192,12 +175,12 @@ pub async fn create_url(form: web::Form<FormData>) -> HttpResponse {
 #[delete("/{url_code}")]
 pub async fn delete_url(url_code: web::Path<String>) -> HttpResponse {
     // connect to the database
-   // create a mongo connection url that uses the local ip address
-    let mongo_connection_string = "mongodb://45.56.109.174:27017/evolving_solutions?retryWrites=true&w=majority";
+    let client = connect_db().await;
+
     let search_param = url_code.into_inner();
     let filter = doc! {"url_code": search_param };
     // Specify the database name
-    let client = Client::with_uri_str(mongo_connection_string).await.expect("failed to connect");
+    // create a mongo connection url that uses the local ip address
     let collection: Collection<Document> = client
         .database("evolving_solutions")
         .collection("url_shortner");
@@ -220,9 +203,11 @@ pub async fn delete_url(url_code: web::Path<String>) -> HttpResponse {
 #[get("/{url_code}")]
 pub async fn redirect_route(url_code: web::Path<String>) -> HttpResponse {
     // connect to the database
-   // create a mongo connection url that uses the local ip address
-    let mongo_connection_string = "mongodb://45.56.109.174:27017/evolving_solutions?retryWrites=true&w=majority";    // Specify the database name
-    let client = Client::with_uri_str(mongo_connection_string).await.expect("failed to connect");
+    // create a mongo connection url that uses the local ip address
+    // Specify the database name
+
+    // create a mongo connection url that uses the local ip address
+    let client = connect_db().await;
     println!("Creating client");
     // refrence the relevant collections
     let collection = client
