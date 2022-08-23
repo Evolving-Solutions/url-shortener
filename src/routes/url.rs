@@ -30,7 +30,7 @@ use std::env;
 //
 // create a mongo connection url that uses the local ip address
 // let local_ip = local_ip().unwrap();
-// let mongo_prefix = "mongodb+srv://";
+// let mongo_prefix = "mongodb://";
 // let mongo_prefix_and_ip = mongo_prefix + &local_ip.to_string();
 // let mongo_uri = mongo_prefix_and_ip + ":27017";
 // let mongo_connection_string = mongo_uri + "/evolving_solutions?retryWrites=true&w=majority";
@@ -69,15 +69,11 @@ use std::env;
 #[get("/url/?{search}")]
 pub async fn get_url(client: web::Data<Client>, search: web::Path<String>) -> HttpResponse {
     // create a mongo connection url that uses the local ip address
-    let local_ip = local_ip().unwrap();
-    let mongo_prefix = "mongodb+srv://";
-    let mongo_prefix_and_ip = mongo_prefix + &local_ip.to_string();
-    let mongo_uri = mongo_prefix_and_ip + ":27017";
-    let mongo_connection_string = mongo_uri + "/evolving_solutions?retryWrites=true&w=majority";
+    let mongo_connection_string = "mongodb://45.56.109.174:27017/evolving_solutions?retryWrites=true&w=majority";
     let uri = std::env::var("MONGODB_URI").unwrap_or_else(|_| mongo_connection_string.into());
 
     // Specify the database name
-    let client = Client::with_uri_str(uri).await.expect("failed to connect");
+    let client = Client::with_uri_str(mongo_connection_string).await.expect("failed to connect");
 
     // Specify the collection name
     let collection = client.database("url_shortner").collection("url-shortener");
@@ -127,15 +123,10 @@ pub struct FormData {
 // #[api_v2_operation]
 #[post("/url")]
 pub async fn create_url(form: web::Form<FormData>) -> HttpResponse {
-    let local_ip = local_ip().unwrap();
-    let mongo_prefix = "mongodb+srv://";
-    let mongo_prefix_and_ip = mongo_prefix + &local_ip.to_string();
-    let mongo_uri = mongo_prefix_and_ip + ":27017";
-    let mongo_connection_string = mongo_uri + "/evolving_solutions?retryWrites=true&w=majority";
-    let uri = std::env::var("MONGODB_URI").unwrap_or_else(|_| mongo_connection_string.into());
-
+   // create a mongo connection url that uses the local ip address
+    let mongo_connection_string = "mongodb://45.56.109.174:27017/evolving_solutions?retryWrites=true&w=majority";
     // Specify the database name
-    let client = Client::with_uri_str(uri).await.expect("failed to connect");
+    let client = Client::with_uri_str(mongo_connection_string).await.expect("failed to connect");
     /***
      * Determine is the request contains a long_url code.
      * If it does, then we need to check if the code is valid.
@@ -201,17 +192,12 @@ pub async fn create_url(form: web::Form<FormData>) -> HttpResponse {
 #[delete("/{url_code}")]
 pub async fn delete_url(url_code: web::Path<String>) -> HttpResponse {
     // connect to the database
-    let local_ip = local_ip().unwrap();
-    let mongo_prefix = "mongodb+srv://";
-    let mongo_prefix_and_ip = mongo_prefix + &local_ip.to_string();
-    let mongo_uri = mongo_prefix_and_ip + ":27017";
-    let mongo_connection_string = mongo_uri + "/evolving_solutions?retryWrites=true&w=majority";
-    let uri = std::env::var("MONGODB_URI").unwrap_or_else(|_| mongo_connection_string.into());
-
+   // create a mongo connection url that uses the local ip address
+    let mongo_connection_string = "mongodb://45.56.109.174:27017/evolving_solutions?retryWrites=true&w=majority";
     let search_param = url_code.into_inner();
     let filter = doc! {"url_code": search_param };
     // Specify the database name
-    let client = Client::with_uri_str(uri).await.expect("failed to connect");
+    let client = Client::with_uri_str(mongo_connection_string).await.expect("failed to connect");
     let collection: Collection<Document> = client
         .database("evolving_solutions")
         .collection("url_shortner");
@@ -234,14 +220,9 @@ pub async fn delete_url(url_code: web::Path<String>) -> HttpResponse {
 #[get("/{url_code}")]
 pub async fn redirect_route(url_code: web::Path<String>) -> HttpResponse {
     // connect to the database
-    let local_ip = local_ip().unwrap();
-    let mongo_prefix = "mongodb+srv://";
-    let mongo_prefix_and_ip = mongo_prefix + &local_ip.to_string();
-    let mongo_uri = mongo_prefix_and_ip + ":27017";
-    let mongo_connection_string = mongo_uri + "/evolving_solutions?retryWrites=true&w=majority";
-    let uri = std::env::var("MONGODB_URI").unwrap_or_else(|_| mongo_connection_string.into());
-    // Specify the database name
-    let client = Client::with_uri_str(uri).await.expect("failed to connect");
+   // create a mongo connection url that uses the local ip address
+    let mongo_connection_string = "mongodb://45.56.109.174:27017/evolving_solutions?retryWrites=true&w=majority";    // Specify the database name
+    let client = Client::with_uri_str(mongo_connection_string).await.expect("failed to connect");
     println!("Creating client");
     // refrence the relevant collections
     let collection = client
