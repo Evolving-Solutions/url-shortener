@@ -26,18 +26,16 @@ COPY . .
 
 RUN cargo test
 
-RUN cargo build --release
+RUN cargo install --path .
 
 RUN strip target/release/url_shortener
 
-RUN cargo install --path .
-
 # trim the binary
 
-CMD ["/usr/local/cargo/bin/url_shortener"]
+CMD ["/root/.cargo/bin/url_shortener"]
 
 FROM alpine:latest
 
-COPY --from=rust /usr/local/cargo/bin/url_shortener /usr/local/bin/url_shortener
+COPY --from=rust /root/.cargo/bin/url_shortener /root/.cargo/bin/url_shortener
 
 CMD ["url_shortener"]
