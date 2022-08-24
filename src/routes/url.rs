@@ -217,7 +217,7 @@ pub async fn redirect_route(url_code: web::Path<String>) -> HttpResponse {
     // refrence the relevant collections
     let collection = client
         .database("evolving_solutions")
-        .collection("url-shortener");
+        .collection("url_shortener");
     println!("Creating collection");
     let search_param = url_code.into_inner();
     println!("Creating search param");
