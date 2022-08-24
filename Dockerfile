@@ -4,26 +4,36 @@
 # https://opensource.org/licenses/MIT
 FROM evolvingsoftware/rust as rust
 
-WORKDIR '/app'
-# 2. Copy the binary to the local binary folder
-
-COPY ./ ./
 
 RUN apt-get install pkg-config -y
 
 RUN apt-get install libssl-dev -y
 
+
+WORKDIR /usr/src/myapp
+
+COPY Cargo.toml Cargo.toml
+
+RUN mkdir src/
+
+RUN echo "fn main() {println!(\"if you see this, the build broke\")}" > src/main.rs
+
+RUN cargo build --release
+
+RUN rm -f target/release/deps/myapp*
+
+COPY . .
+
 RUN cargo test
 
 RUN cargo build --release
 
-# When `docker run` is executed, launch the binary!
-ENTRYPOINT ["./target/release/url_shortener"]
+RUN cargo install --path .
 
-# FROM scratch
+CMD ["/usr/local/cargo/bin/url_shortener"]
 
-# WORKDIR '/app'
+FROM alpine:latest
 
-# COPY --from=rust /app/target/release/url_shortener .
+COPY --from=cargo-build /usr/local/cargo/bin/url_shortener /usr/local/bin/url_shortener
 
-# ENTRYPOINT [./url_shortener]
+CMD ["url_shortener"]

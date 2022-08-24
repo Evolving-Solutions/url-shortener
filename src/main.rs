@@ -1,18 +1,10 @@
-use actix_files::NamedFile;
-use actix_web::{web, App, HttpRequest, HttpServer, Result};
+use actix_web::{App, HttpServer};
 use local_ip_address::local_ip;
 use routes::url;
-use std::{env, path::PathBuf};
+use std::env;
 mod db;
 mod functions;
 mod routes;
-
-/// Serve index.html as a static file
-/// GET /
-async fn index(_req: HttpRequest) -> Result<NamedFile> {
-    let path: PathBuf = "./static/index.html".parse().unwrap();
-    Ok(NamedFile::open(path)?)
-}
 
 /// # Main web server
 /// Serves as the main entry point to the application.
@@ -30,7 +22,6 @@ async fn main() -> std::io::Result<()> {
     println!("Listen on: {}", server_w_port);
     HttpServer::new(|| {
         App::new()
-            .route("/", web::get().to(index))
             .service(url::get_url)
             .service(url::create_url)
             .service(url::redirect_route)
