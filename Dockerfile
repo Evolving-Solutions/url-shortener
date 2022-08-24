@@ -28,7 +28,11 @@ RUN cargo test
 
 RUN cargo build --release
 
+RUN strip target/release/url_shortener
+
 RUN cargo install --path .
+
+# trim the binary
 
 CMD ["/usr/local/cargo/bin/url_shortener"]
 
