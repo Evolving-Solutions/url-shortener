@@ -231,7 +231,6 @@ pub async fn redirect_route(url_code: web::Path<String>) -> HttpResponse {
     println!("Retrieved URL");
     // return the long_url
     println!("Matching URL");
-    let response = HttpResponse::NotFound().body("URL not found");z
     match long_url {
         Some(url) => {
             let url: Url = bson::from_bson(bson::Bson::Document(url)).unwrap();
@@ -239,6 +238,6 @@ pub async fn redirect_route(url_code: web::Path<String>) -> HttpResponse {
                 .append_header(("LOCATION", url.long_url))
                 .finish()
         }
-        None => response,
+        None => HttpResponse::NotFound().body("URL not found"),
     }
 }
