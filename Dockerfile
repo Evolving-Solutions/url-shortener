@@ -1,35 +1,29 @@
-# Using Rust
-FROM ubuntu:jammy
-# Make sure it works.
-CMD echo "Welcome to this Docker server. This application is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free"
+# Copyright (c) 2022 Evolving Software Corporation
+#
+# This software is released under the MIT License.
+# https://opensource.org/licenses/MIT
+FROM evolvingsoftware/rust as rust
 
-# Update ubuntu
-RUN apt-get update
+WORKDIR '/app'
+# 2. Copy the binary to the local binary folder
 
-RUN apt-get upgrade -y
+COPY ./ ./
 
-# Install dependencies
-RUN apt-get install build-essential -y \
-        lld -y \
-        clang -y\
-        curl -y \
-        wget -y \
-        pkg-config -y \
-        libssl-dev -y \
-        libc6-dev -y
+RUN apt-get install pkg-config -y
 
-# Update the new packages
-RUN apt-get update
+RUN apt-get install libssl-dev -y
 
-# Install the latest version of rust.
-RUN curl https://sh.rustup.rs -sSf | bash -s -- -y
+RUN cargo test
 
-# Add .cargo/bin to PATH
-ENV PATH="/root/.cargo/bin:${PATH}"
+RUN cargo build --release
 
-RUN echo 'source $HOME/.cargo/env' >> $HOME/.bashrc
+# When `docker run` is executed, launch the binary!
+ENTRYPOINT ["./target/release/url_shortener"]
 
-RUN rustup target add x86_64-unknown-linux-gnu
+# FROM scratch
 
-# Check cargo is visible
-RUN cargo --help
+# WORKDIR '/app'
+
+# COPY --from=rust /app/target/release/url_shortener .
+
+# ENTRYPOINT [./url_shortener]
