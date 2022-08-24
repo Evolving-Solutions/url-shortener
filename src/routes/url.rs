@@ -1,5 +1,5 @@
 use crate::db;
-pub use crate::db::models::url::Url;
+pub use crate::db::models::url::{CreateUrl, Url};
 pub use crate::functions::generate::*;
 use actix_web::{delete, get, post, web, HttpResponse};
 use chrono::prelude::*;
@@ -108,73 +108,49 @@ pub async fn get_url(search: web::Path<String>) -> HttpResponse {
 ///
 // #[api_v2_operation]
 #[post("/url")]
-pub async fn create_url(form: web::Form<FormData>) -> HttpResponse {
-    // create a mongo connection url that uses the local ip address
-    let client = connect_db().await;
-    /***
-     * Determine is the request contains a long_url code.
-     * If it does, then we need to check if the code is valid.
-     * If it is valid, then we need to check if the code is already in the database.
-     * If it is, then we need to return the url.
-     * If it is not, then we need generate a new code, then check if it is in the database.
-     * If it is, then we need to return an error, and generate a new code.
-     * If it is not, then we need to insert the url into the database.
-     */
+pub async fn create_url(form: web::Form<CreateUrl>) -> HttpResponse {
+    // copy the form into a new struct
+    // check if the url_code is present in the request body, if not generate a new one.
+    let mut url = form.into_inner();
+    if url.url_code.is_empty() {
+        url.url_code = generate_url_code()
+    }
 
-    // Todo: Check if the short_url is already in the database.
-
-    // Declare a mutable variable to hold the url_code from the request or a generated code.
-    // check if form.url_code is = Some("");
-    // if it is, then we need to generate a code.
-    // if it is not, then we need to check if the code is in the database.
-    // if it is, then we need to return the url.
-
-    let url_code = form.url_code.clone().unwrap_or_else(generate_url_code);
     let local_ip = local_ip().unwrap();
     let port = ":8844".to_string();
     let server_ip = local_ip.clone().to_string();
     let server_w_port = server_ip + &port;
     let server_uri = "http://".to_owned() + &server_w_port;
-    // Create a struct to hold the data and model it with the URL struct. Assign the data to the struct.
-    // This will hold tangible data soon.
-    let url = doc! {
-        "long_url": form.long_url.clone(),
-        "short_url": std::env::var("BASE_URL").unwrap_or(server_uri) + "/" + &url_code,
-        "url_code": url_code.clone(),
-        "shorten_date": Utc::now().to_string(),
+
+    let new_url = Url {
+        long_url: url.long_url,
+        url_code: url.url_code.clone(),
+        short_url: std::env::var("BASE_URL").unwrap_or(server_uri) + "/" + &url.url_code,
+        shorten_date: Utc::now().naive_utc().to_string(),
     };
 
-    println!("This is the URL Code: {}", url_code.clone());
+    println!("This is the URL Code: {}", url.url_code.clone());
     // check if database collection evolving_solutions exists if it does not then create it.
-    let db = client.database("evolving_solutions");
+    let client = connect_db().await;
     // Get the collection
-    let collection = db.collection::<Document>("url_shortner");
+    let collection: Collection<Url> = client
+        .database("evolving_solutions")
+        .collection("url_shortener");
 
     // Insert the data into the collection
     collection
-        .insert_one(url, None)
+        .insert_one(new_url.clone(), None)
         .await
         .expect("Failed to insert document");
 
     // find the collection that was just created using the Long URL.
     // Return the data back in the response body to the client with JSON.
     // Use unique index to make sure the URL is unique.
-    let filter = doc! {"long_url": form.long_url.clone()};
-    let url = collection
-        .find_one(Some(filter), None)
-        .await
-        .expect("Failed to find URL");
-
-    match url {
-        Some(url) => {
-            let url: Url = bson::from_bson(bson::Bson::Document(url)).unwrap();
-            HttpResponse::Ok().json(url)
-        }
-        None => {
-            print!("URL not found");
-            println!("{:?}", &url);
-            HttpResponse::NotFound().body("URL not found")
-        }
+    let filter = doc! {"long_url": new_url.long_url.clone()};
+    match collection.find_one(filter, None).await {
+        Ok(Some(url)) => HttpResponse::Ok().json(url),
+        Ok(None) => HttpResponse::NotFound().body("URL not found"),
+        Err(e) => HttpResponse::InternalServerError().body(format!("{}", e)),
     }
 }
 
@@ -182,9 +158,7 @@ pub async fn create_url(form: web::Form<FormData>) -> HttpResponse {
 /// #[api_v2_operation]
 #[delete("/{url_code}")]
 pub async fn delete_url(url_code: web::Path<String>) -> HttpResponse {
-    // connect to the database
     let client = connect_db().await;
-
     let search_param = url_code.into_inner();
     let filter = doc! {"url_code": search_param };
     // Specify the database name
@@ -205,40 +179,26 @@ pub async fn delete_url(url_code: web::Path<String>) -> HttpResponse {
     }
 }
 
+#[derive(Deserialize, Debug)]
+pub struct UrlCode {
+    url_code: String,
+}
+
 //Get URL by Short URL
 // Mark operations like so...
 // #[api_v2_operation]
 #[get("/{url_code}")]
-pub async fn redirect_route(url_code: web::Path<String>) -> HttpResponse {
-    // connect to the database
-    // create a mongo connection url that uses the local ip address
-    // Specify the database name
-
-    // create a mongo connection url that uses the local ip address
+pub async fn redirect_route(url_code_path: web::Path<UrlCode>) -> HttpResponse {
     let client = connect_db().await;
-    println!("Creating client");
-    // refrence the relevant collections
-    let collection = client
+    let collection: Collection<Url> = client
         .database("evolving_solutions")
         .collection("url_shortener");
-    println!("Creating collection");
-    let search_param = url_code.into_inner();
-    println!("Creating search param");
-    let filter = doc! {"url_code": search_param };
-    println!("Creating search filter");
-    let long_url = collection
-        .find_one(Some(filter), None)
-        .await
-        .expect("Error looking for url.");
-
-    print!("{:?}", long_url);
-    match long_url {
-        Some(url) => {
-            let url: Url = bson::from_bson(bson::Bson::Document(url)).unwrap();
-            HttpResponse::Found()
-                .append_header(("LOCATION", url.long_url))
-                .finish()
-        }
-        None => HttpResponse::NotFound().body("URL not found"),
+    let filter = doc! {"url_code": url_code_path.url_code.clone()};
+    match collection.find_one(filter, None).await {
+        Ok(Some(url)) => HttpResponse::Found()
+            .append_header(("LOCATION", url.long_url.clone()))
+            .finish(),
+        Ok(None) => HttpResponse::NotFound().body("URL not found"),
+        Err(e) => HttpResponse::InternalServerError().body(format!("{}", e)),
     }
 }

@@ -45,3 +45,8 @@ pub struct Url {
     pub url_code: String,
     pub shorten_date: String,
 }
+#[derive(Deserialize, Serialize, Debug, Clone, Apiv2Schema)]
+pub struct CreateUrl {
+    pub long_url: String,
+    pub url_code: String,
+}
