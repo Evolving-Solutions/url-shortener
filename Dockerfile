@@ -28,7 +28,7 @@ RUN cargo test
 
 RUN cargo install --path .
 
-RUN strip target/release/url_shortener
+RUN strip /root/.cargo/bin/url_shortener
 
 # trim the binary
 
