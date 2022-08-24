@@ -13,7 +13,6 @@ use random_string::generate;
 ////////////////////////////////////////////////////////////////////////////////
 // Gernerate a random series of 6 alphanumeric characters.
 pub fn generate_url_code() -> String {
-    let charset = "abcdefghijklmnopqrstuvwxyz0123456789";
-    let url_code = generate(6, charset);
-    url_code
+    let charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    generate(6, charset)
 }

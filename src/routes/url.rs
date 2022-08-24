@@ -129,7 +129,7 @@ pub async fn create_url(form: web::Form<FormData>) -> HttpResponse {
     // if it is not, then we need to check if the code is in the database.
     // if it is, then we need to return the url.
 
-    let url_code = form.url_code.clone().unwrap_or_else(|| generate_url_code());
+    let url_code = form.url_code.clone().unwrap_or_else(generate_url_code);
     let local_ip = local_ip().unwrap();
     let port = ":8844".to_string();
     let server_ip = local_ip.clone().to_string();
@@ -139,7 +139,7 @@ pub async fn create_url(form: web::Form<FormData>) -> HttpResponse {
     // This will hold tangible data soon.
     let url = doc! {
         "long_url": form.long_url.clone(),
-        "short_url": std::env::var("BASE_URL").unwrap_or_else( |_|server_uri.into()) + "/" + &url_code,
+        "short_url": std::env::var("BASE_URL").unwrap_or(server_uri) + "/" + &url_code,
         "url_code": url_code.clone(),
         "shorten_date": Utc::now().to_string(),
     };
@@ -226,10 +226,9 @@ pub async fn redirect_route(url_code: web::Path<String>) -> HttpResponse {
     let long_url = collection
         .find_one(Some(filter), None)
         .await
-        .ok()
         .expect("Error looking for url.");
 
-        print!("{:?}", long_url);
+    print!("{:?}", long_url);
     match long_url {
         Some(url) => {
             let url: Url = bson::from_bson(bson::Bson::Document(url)).unwrap();

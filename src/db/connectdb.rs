@@ -9,8 +9,8 @@ pub mod database {
         let mongo_uri = mongo_prefix_and_ip.to_owned() + ":27017";
         let mongo_connection_string =
             mongo_uri.to_owned() + "/evolving_solutions?directConnection=true&retryWrites=true";
-        let uri = std::env::var("MONGODB_URI").unwrap_or_else(|_| mongo_connection_string.into());
-        let client_connection = uri.clone().to_string();
+        let uri = std::env::var("MONGODB_URI").unwrap_or(mongo_connection_string);
+        let client_connection = uri.to_string();
         let client_options = ClientOptions::parse(client_connection).await;
         match client_options {
             Ok(options) => {

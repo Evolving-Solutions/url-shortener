@@ -1,6 +1,5 @@
 use actix_files::NamedFile;
 use actix_web::{web, App, HttpRequest, HttpServer, Result};
-use env_logger;
 use local_ip_address::local_ip;
 use routes::url;
 use std::{env, path::PathBuf};
