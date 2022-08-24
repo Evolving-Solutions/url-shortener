@@ -4,6 +4,7 @@ pub use crate::functions::generate::*;
 use actix_web::{delete, get, post, web, HttpResponse};
 use chrono::prelude::*;
 use db::connectdb::database::connect_db;
+use local_ip_address::local_ip;
 use mongodb::{
     bson,
     bson::{doc, Document},
@@ -129,12 +130,16 @@ pub async fn create_url(form: web::Form<FormData>) -> HttpResponse {
     // if it is, then we need to return the url.
 
     let url_code = form.url_code.clone().unwrap_or_else(|| generate_url_code());
-
+    let local_ip = local_ip().unwrap();
+    let port = ":8844".to_string();
+    let server_ip = local_ip.clone().to_string();
+    let server_w_port = server_ip + &port;
+    let server_uri = "http://".to_owned() + &server_w_port;
     // Create a struct to hold the data and model it with the URL struct. Assign the data to the struct.
     // This will hold tangible data soon.
     let url = doc! {
         "long_url": form.long_url.clone(),
-        "short_url": std::env::var("BASE_URL").unwrap_or_else( |_|"http://localhost:8080".into()) + "/" + &url_code,
+        "short_url": std::env::var("BASE_URL").unwrap_or_else( |_|server_uri.into()) + "/" + &url_code,
         "url_code": url_code.clone(),
         "shorten_date": Utc::now().to_string(),
     };
