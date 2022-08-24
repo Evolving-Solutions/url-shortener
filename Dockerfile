@@ -34,6 +34,6 @@ CMD ["/usr/local/cargo/bin/url_shortener"]
 
 FROM alpine:latest
 
-COPY --from=cargo-build /usr/local/cargo/bin/url_shortener /usr/local/bin/url_shortener
+COPY --from=rust /usr/local/cargo/bin/url_shortener /usr/local/bin/url_shortener
 
 CMD ["url_shortener"]
