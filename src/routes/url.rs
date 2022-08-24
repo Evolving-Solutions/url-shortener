@@ -166,12 +166,17 @@ pub async fn create_url(form: web::Form<FormData>) -> HttpResponse {
         .find_one(Some(filter), None)
         .await
         .expect("Failed to find URL");
+
     match url {
         Some(url) => {
             let url: Url = bson::from_bson(bson::Bson::Document(url)).unwrap();
             HttpResponse::Ok().json(url)
         }
-        None => HttpResponse::NotFound().body("URL not found"),
+        None => {
+            print!("URL not found");
+            println!("{:?}", &url);
+            HttpResponse::NotFound().body("URL not found")
+        }
     }
 }
 
