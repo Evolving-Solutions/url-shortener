@@ -228,10 +228,10 @@ pub async fn redirect_route(url_code: web::Path<String>) -> HttpResponse {
         .await
         .ok()
         .expect("Error looking for url.");
-    println!("Retrieved URL");
     // return the long_url
     println!("Matching URL");
     let response = HttpResponse::NotFound().body("URL not found");
+    print!("Response from server: {:?}", response);
     match long_url {
         Some(url) => {
             let url: Url = bson::from_bson(bson::Bson::Document(url)).unwrap();
