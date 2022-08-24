@@ -40,4 +40,7 @@ COPY --from=rust /root/.cargo/bin/url_shortener /root/.cargo/bin/url_shortener
 # Add the binary to the path
 ENV PATH=$PATH:/root/.cargo/bin
 
+# Echo the path to the console
+RUN echo $PATH
+
 CMD ["url_shortener"]
