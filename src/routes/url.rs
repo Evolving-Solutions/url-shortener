@@ -146,11 +146,9 @@ pub async fn create_url(form: web::Form<FormData>) -> HttpResponse {
 
     println!("This is the URL Code: {}", url_code.clone());
     // check if database collection evolving_solutions exists if it does not then create it.
-
+    let db = client.database("evolving_solutions");
     // Get the collection
-    let collection = client
-        .database("evolving_solutions")
-        .collection("url_shortner");
+    let collection = db.collection::<Document>("url_shortner");
 
     // Insert the data into the collection
     collection
