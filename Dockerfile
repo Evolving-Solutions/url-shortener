@@ -4,43 +4,36 @@
 # https://opensource.org/licenses/MIT
 FROM evolvingsoftware/rust as rust
 
+# RUN apt-get install pkg-config -y
 
-RUN apt-get install pkg-config -y
+# RUN apt-get install libssl-dev -y
 
-RUN apt-get install libssl-dev -y
+WORKDIR ./usr/src/url_shortener
 
+COPY Cargo.toml .
 
-WORKDIR /usr/src/myapp
+COPY Cargo.lock .
 
-COPY Cargo.toml Cargo.toml
+RUN mkdir src
 
-RUN mkdir src/
+RUN touch src/main.rs
 
-RUN echo "fn main() {println!(\"if you see this, the build broke\")}" > src/main.rs
+RUN mkdir .cargo
 
-RUN cargo build --release
+COPY .cargo/config.toml .cargo/config.toml
 
-RUN rm -f target/release/deps/myapp*
-
-COPY . .
+RUN cargo vendor > .cargo/config.toml
 
 RUN cargo test
 
-RUN cargo install --path .
+RUN cargo install --path . --verbose
 
 RUN strip /root/.cargo/bin/url_shortener
 
-# trim the binary
+FROM evolvingsoftware/rust
 
-CMD ["/root/.cargo/bin/url_shortener"]
+COPY --from=rust /root/.cargo/bin/url_shortener /bin
 
-FROM alpine:latest
-
-COPY --from=rust /root/.cargo/bin/url_shortener /root/.cargo/bin/url_shortener
-# Add the binary to the path
-ENV PATH=$PATH:/root/.cargo/bin
-
-# Echo the path to the console
-RUN echo $PATH
+RUN ls /bin
 
 CMD ["url_shortener"]
