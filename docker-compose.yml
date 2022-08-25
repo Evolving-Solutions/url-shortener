@@ -7,6 +7,7 @@ services:
       - "8844:8844"
     environment:
       - BASE_URL=https://evolveurl.co
+      - MONGODB_URI=mongodb://evolveurl.co:27017/evolving_solutions?directConnection=true&retryWrites=true
   mongodb:
     container_name: mongodb
     image: mongo:5.0
