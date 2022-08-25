@@ -24,6 +24,8 @@ COPY .cargo/config.toml .cargo/config.toml
 
 RUN cargo vendor > .cargo/config.toml
 
+COPY ./src ./src
+
 RUN cargo test
 
 RUN cargo install --path . --verbose
