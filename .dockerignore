@@ -1,0 +1,14 @@
+// Copyright (c) 2022 Evolving Software Corporation
+// 
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+
+target
+bootstrap-server.sh
+build_docker_image.sh
+build-server.sh
+prepare_server.sh
+static
+.vscode
+.vs
+.idea
