@@ -202,3 +202,20 @@ pub async fn redirect_route(url_code_path: web::Path<UrlCode>) -> HttpResponse {
         Err(e) => HttpResponse::InternalServerError().body(format!("{}", e)),
     }
 }
+
+
+#[get("/api/{url_code}")]
+pub async fn redirect_route_api(url_code_path: web::Path<String>) -> HttpResponse {
+    let client = connect_db().await;
+    let collection: Collection<Url> = client
+        .database("evolving_solutions")
+        .collection("url_shortener");
+    let filter = doc! {"url_code": url_code_path.clone()};
+    match collection.find_one(filter, None).await {
+        Ok(Some(url)) => HttpResponse::Found()
+            .append_header(("LOCATION", url.long_url.clone()))
+            .finish(),
+        Ok(None) => HttpResponse::NotFound().body("URL not found"),
+        Err(e) => HttpResponse::InternalServerError().body(format!("{}", e)),
+    }
+}
