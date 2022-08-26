@@ -25,6 +25,7 @@ async fn main() -> std::io::Result<()> {
             .service(url::get_url)
             .service(url::create_url)
             .service(url::redirect_route)
+            .service(url::redirect_v1_api_route)
             .service(url::delete_url)
         // .with_json_spec_at("/api/spec/v2")
     })

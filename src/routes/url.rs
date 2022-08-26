@@ -205,7 +205,7 @@ pub async fn redirect_route(url_code_path: web::Path<UrlCode>) -> HttpResponse {
 
 
 #[get("/api/{url_code}")]
-pub async fn redirect_route_api(url_code_path: web::Path<String>) -> HttpResponse {
+pub async fn redirect_v1_api_route(url_code_path: web::Path<String>) -> HttpResponse {
     let client = connect_db().await;
     let collection: Collection<Url> = client
         .database("evolving_solutions")
