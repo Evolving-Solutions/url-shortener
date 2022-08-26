@@ -1,5 +1,3 @@
-use std::any::Any;
-
 use crate::db;
 pub use crate::db::models::url::{CreateUrl, Url};
 pub use crate::functions::generate::*;
