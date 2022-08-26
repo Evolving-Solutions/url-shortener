@@ -1,3 +1,5 @@
+use actix_web::cookie::time::Time;
+use mongodb::bson::DateTime;
 use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
 
@@ -38,12 +40,12 @@ use serde::{Deserialize, Serialize};
 ///
 
 // A url struct that is able to be cloned
-#[derive(Deserialize, Serialize, Debug, Clone, Apiv2Schema)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Url {
     pub long_url: String,
     pub short_url: String,
     pub url_code: String,
-    pub shorten_date: String,
+    pub shorten_date: DateTime,
 }
 #[derive(Deserialize, Serialize, Debug, Clone, Apiv2Schema)]
 pub struct CreateUrl {

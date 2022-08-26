@@ -1,3 +1,5 @@
+use std::any::Any;
+
 use crate::db;
 pub use crate::db::models::url::{CreateUrl, Url};
 pub use crate::functions::generate::*;
@@ -126,7 +128,7 @@ pub async fn create_url(form: web::Form<CreateUrl>) -> HttpResponse {
         long_url: url.long_url,
         url_code: url.url_code.clone(),
         short_url: std::env::var("BASE_URL").unwrap_or(server_uri) + "/" + &url.url_code,
-        shorten_date: Utc::now().naive_utc().to_string(),
+        shorten_date: bson::DateTime::from_chrono(Utc::now()),
     };
 
     println!("This is the URL Code: {}", url.url_code.clone());
@@ -203,9 +205,9 @@ pub async fn redirect_route(url_code_path: web::Path<UrlCode>) -> HttpResponse {
     }
 }
 
-
 #[get("/api/{url_code}")]
 pub async fn redirect_v1_api_route(url_code_path: web::Path<UrlCode>) -> HttpResponse {
+    println!("{:?}", url_code_path);
     let client = connect_db().await;
     let collection: Collection<Url> = client
         .database("evolving_solutions")
