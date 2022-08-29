@@ -4,6 +4,7 @@ pub use crate::functions::generate::*;
 use actix_web::{delete, get, post, web, HttpResponse};
 use chrono::prelude::*;
 use db::connectdb::database::connect_db;
+use futures::StreamExt;
 use local_ip_address::local_ip;
 use mongodb::{
     bson,
@@ -19,47 +20,6 @@ pub struct FormData {
     // a url_code may be present in the request body, but it is not required.
     url_code: Option<String>,
 }
-
-/// # Name: get_all_urls
-/// Decsription: Gets all the urls in the collection.
-
-// #[get("/url/getAll")]
-// pub async fn get_all_urls() -> HttpResponse {
-//
-// create a mongo connection url that uses the local ip address
-// let local_ip = local_ip().unwrap();
-// let mongo_prefix = "mongodb://";
-// let mongo_prefix_and_ip = mongo_prefix + &local_ip.to_string();
-// let mongo_uri = mongo_prefix_and_ip + ":27017";
-// let mongo_connection_string = mongo_uri + "/evolving_solutions?retryWrites=true&w=majority";
-// let uri = std::env::var("MONGODB_URI").unwrap_or_else(|_| mongo_connection_string.into());
-
-//     let client = Client::with_uri_str(uri).await.expect("Failed to connect.");
-//
-//     // Specify the collection name
-//     let collection = client.database("evolving_solutions").collection("url-shortener");
-//
-//     // Create a filter to search for the URL
-//
-//     let all_urls = collection.list_indexes(None).await.unwrap();
-//     while let Some(Ok(index)) = cursor.next().await {
-//         if index.keys == doc! {"_id": 1} {
-//             continue;
-//         } else {
-//             assert_eq!(index.keys, doc! {"index": 1});
-//             assert_eq!(index.clone().options.unwrap().unique, None);
-//             assert_eq!(index.clone().options.unwrap().sparse.unwrap(), true);
-//         }
-//     }
-//     // Return the URL
-//     match all_urls {
-//         Some(all_urls) => {
-//             println("Here is the data you requested: {}", e);
-//             HttpResponse::Ok().finish()
-//         }
-//         None => HttpResponse::NotFound().body("URL not found"),
-//     }
-// }
 
 /// # Name: URL Getter
 /// Description: Get a url by refrences
@@ -219,3 +179,59 @@ pub async fn redirect_v1_api_route(url_code_path: web::Path<UrlCode>) -> HttpRes
         Err(e) => HttpResponse::InternalServerError().body(format!("{}", e)),
     }
 }
+
+/// # Name: get_all_urls
+/// Decsription: Gets all the urls in the collection.
+
+#[get("/get_all_urls")] // This is the route that will be called by the client
+pub async fn get_all_urls() -> HttpResponse {
+    let client = connect_db().await;
+    let collection: Collection<Url> = client
+        .database("evolving_solutions")
+        .collection("url_shortener");
+    let mut cursor = collection.find(None, None).await.unwrap();
+    let mut urls = Vec::new();
+    while let Some(result) = cursor.next().await {
+        let url = result.unwrap();
+        urls.push(url);
+    }
+    HttpResponse::Ok().json(urls)
+}
+
+// #[get("/url/getAll")]
+// pub async fn get_all_urls() -> HttpResponse {
+//
+// create a mongo connection url that uses the local ip address
+// let local_ip = local_ip().unwrap();
+// let mongo_prefix = "mongodb://";
+// let mongo_prefix_and_ip = mongo_prefix + &local_ip.to_string();
+// let mongo_uri = mongo_prefix_and_ip + ":27017";
+// let mongo_connection_string = mongo_uri + "/evolving_solutions?retryWrites=true&w=majority";
+// let uri = std::env::var("MONGODB_URI").unwrap_or_else(|_| mongo_connection_string.into());
+
+//     let client = Client::with_uri_str(uri).await.expect("Failed to connect.");
+//
+//     // Specify the collection name
+//     let collection = client.database("evolving_solutions").collection("url-shortener");
+//
+//     // Create a filter to search for the URL
+//
+//     let all_urls = collection.list_indexes(None).await.unwrap();
+//     while let Some(Ok(index)) = cursor.next().await {
+//         if index.keys == doc! {"_id": 1} {
+//             continue;
+//         } else {
+//             assert_eq!(index.keys, doc! {"index": 1});
+//             assert_eq!(index.clone().options.unwrap().unique, None);
+//             assert_eq!(index.clone().options.unwrap().sparse.unwrap(), true);
+//         }
+//     }
+//     // Return the URL
+//     match all_urls {
+//         Some(all_urls) => {
+//             println("Here is the data you requested: {}", e);
+//             HttpResponse::Ok().finish()
+//         }
+//         None => HttpResponse::NotFound().body("URL not found"),
+//     }
+// }

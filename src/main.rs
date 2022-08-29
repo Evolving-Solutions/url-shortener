@@ -22,6 +22,7 @@ async fn main() -> std::io::Result<()> {
     println!("Listen on: {}", server_w_port);
     HttpServer::new(|| {
         App::new()
+            .service(url::get_all_urls)
             .service(url::get_url)
             .service(url::create_url)
             .service(url::redirect_route)
